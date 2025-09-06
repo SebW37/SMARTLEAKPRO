@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ intervention.intervention_id }} - SmartLeakPro{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'home' %}">Accueil</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'interventions:intervention_list' %}">Interventions</a></li>
+                <li class="breadcrumb-item active">{{ intervention.intervention_id }}</li>
+            </ol>
+        </nav>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>🔧 {{ intervention.intervention_id }} - {{ intervention.title }}</h1>
+            <a href="/admin/interventions/intervention/{{ intervention.id }}/change/" class="btn btn-outline-secondary">
+                ✏️ Modifier
+            </a>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Informations générales -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Informations générales</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Description:</strong> {{ intervention.description }}</p>
+                                <p><strong>Client:</strong> {{ intervention.client.name }}</p>
+                                <p><strong>Site:</strong> {{ intervention.site.name }}</p>
+                                <p><strong>Adresse:</strong> {{ intervention.site.address }}, {{ intervention.site.city }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Date planifiée:</strong> {{ intervention.scheduled_date|date:"d/m/Y à H:i" }}</p>
+                                <p><strong>Durée estimée:</strong> {{ intervention.estimated_duration }}</p>
+                                <p><strong>Priorité:</strong> 
+                                    <span class="badge 
+                                        {% if intervention.priority == 'critical' %}bg-danger
+                                        {% elif intervention.priority == 'high' %}bg-warning
+                                        {% elif intervention.priority == 'medium' %}bg-info
+                                        {% else %}bg-secondary{% endif %}">
+                                        {{ intervention.get_priority_display }}
+                                    </span>
+                                </p>
+                                <p><strong>Statut:</strong> 
+                                    <span class="badge 
+                                        {% if intervention.status == 'completed' %}bg-success
+                                        {% elif intervention.status == 'in_progress' %}bg-primary
+                                        {% elif intervention.status == 'cancelled' %}bg-danger
+                                        {% elif intervention.status == 'postponed' %}bg-warning
+                                        {% else %}bg-secondary{% endif %}">
+                                        {{ intervention.get_status_display }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Équipe -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Équipe assignée</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Technicien principal:</strong> 
+                                    {% if intervention.technician %}
+                                        {{ intervention.technician.get_full_name|default:intervention.technician.username }}
+                                    {% else %}
+                                        <span class="text-muted">Non assigné</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Équipe:</strong> 
+                                    {% if intervention.team_members.exists %}
+                                        {% for member in intervention.team_members.all %}
+                                            {{ member.get_full_name|default:member.username }}{% if not forloop.last %}, {% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="text-muted">Aucun membre d'équipe</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Types de fuites et équipements -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Types de fuites et équipements</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Types de fuites:</strong></p>
+                                {% if intervention.leak_types.exists %}
+                                    <ul class="list-unstyled">
+                                        {% for leak_type in intervention.leak_types.all %}
+                                        <li>
+                                            <span class="badge bg-info me-1">{{ leak_type.name }}</span>
+                                            <small class="text-muted">(Niveau {{ leak_type.severity_level }})</small>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <span class="text-muted">Aucun type spécifié</span>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Équipements nécessaires:</strong></p>
+                                {% if intervention.equipment_needed.exists %}
+                                    <ul class="list-unstyled">
+                                        {% for equipment in intervention.equipment_needed.all %}
+                                        <li>
+                                            <span class="badge bg-secondary me-1">{{ equipment.name }}</span>
+                                            <small class="text-muted">({{ equipment.get_category_display }})</small>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <span class="text-muted">Aucun équipement spécifié</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Résultats -->
+                {% if intervention.findings or intervention.recommendations or intervention.client_notes %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Résultats de l'intervention</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if intervention.actual_start_time and intervention.actual_end_time %}
+                        <p><strong>Durée réelle:</strong> 
+                            {{ intervention.actual_start_time|time:"H:i" }} - {{ intervention.actual_end_time|time:"H:i" }}
+                        </p>
+                        {% endif %}
+                        
+                        {% if intervention.findings %}
+                        <p><strong>Découvertes:</strong></p>
+                        <p>{{ intervention.findings|linebreaks }}</p>
+                        {% endif %}
+                        
+                        {% if intervention.recommendations %}
+                        <p><strong>Recommandations:</strong></p>
+                        <p>{{ intervention.recommendations|linebreaks }}</p>
+                        {% endif %}
+                        
+                        {% if intervention.client_notes %}
+                        <p><strong>Notes client:</strong></p>
+                        <p>{{ intervention.client_notes|linebreaks }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-4">
+                <!-- Photos -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Photos ({{ photos.count }})</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if photos %}
+                            <div class="row">
+                                {% for photo in photos|slice:":6" %}
+                                <div class="col-6 mb-2">
+                                    <img src="{{ photo.photo.url }}" class="img-thumbnail" style="width: 100%; height: 100px; object-fit: cover;">
+                                    {% if photo.caption %}
+                                    <small class="text-muted d-block">{{ photo.caption|truncatechars:20 }}</small>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% if photos.count > 6 %}
+                            <p class="text-muted">... et {{ photos.count|add:"-6" }} autres photos</p>
+                            {% endif %}
+                        {% else %}
+                            <p class="text-muted">Aucune photo</p>
+                        {% endif %}
+                        <a href="/admin/interventions/interventionphoto/add/?intervention={{ intervention.id }}" class="btn btn-sm btn-outline-primary">
+                            + Ajouter des photos
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Rapports -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Rapports ({{ reports.count }})</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if reports %}
+                            {% for report in reports|slice:":3" %}
+                            <div class="border-bottom pb-2 mb-2">
+                                <h6>{{ report.title }}</h6>
+                                <p class="text-muted mb-1">{{ report.get_report_type_display }}</p>
+                                <p class="small mb-0">{{ report.summary|truncatechars:50 }}</p>
+                            </div>
+                            {% endfor %}
+                            {% if reports.count > 3 %}
+                            <p class="text-muted">... et {{ reports.count|add:"-3" }} autres rapports</p>
+                            {% endif %}
+                        {% else %}
+                            <p class="text-muted">Aucun rapport</p>
+                        {% endif %}
+                        <a href="/admin/interventions/interventionreport/add/?intervention={{ intervention.id }}" class="btn btn-sm btn-outline-primary">
+                            + Créer un rapport
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Géolocalisation -->
+                {% if intervention.latitude and intervention.longitude %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">📍 Localisation</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Coordonnées:</strong></p>
+                        <p>{{ intervention.latitude }}, {{ intervention.longitude }}</p>
+                        {% if intervention.address_notes %}
+                        <p><strong>Notes d'adresse:</strong></p>
+                        <p>{{ intervention.address_notes }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
