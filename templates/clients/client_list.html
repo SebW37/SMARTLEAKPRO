@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Liste des clients - SmartLeakPro{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>📋 Liste des clients</h1>
+            <a href="/admin/clients/client/add/" class="btn btn-primary">+ Nouveau client</a>
+        </div>
+
+        {% if clients %}
+            <div class="row">
+                {% for client in clients %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ client.name }}</h5>
+                            <p class="card-text">
+                                <strong>Type:</strong> {{ client.get_client_type_display }}<br>
+                                <strong>Ville:</strong> {{ client.city }}<br>
+                                <strong>Email:</strong> {{ client.email|default:"Non renseigné" }}<br>
+                                <strong>Statut:</strong> 
+                                <span class="badge {% if client.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                                    {% if client.is_active %}Actif{% else %}Inactif{% endif %}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{% url 'clients:client_detail' client.id %}" class="btn btn-outline-primary btn-sm">
+                                Voir détails
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <h4>Aucun client trouvé</h4>
+                <p>Commencez par ajouter votre premier client via l'administration Django.</p>
+                <a href="/admin/clients/client/add/" class="btn btn-primary">Ajouter un client</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
