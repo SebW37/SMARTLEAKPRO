@@ -9,6 +9,8 @@ def main():
     # Use production settings if RAILWAY_ENVIRONMENT is set
     if os.environ.get('RAILWAY_ENVIRONMENT'):
         os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'smartleakpro.settings_production')
+    elif os.environ.get('HOSTINGER_DEPLOYMENT'):
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'smartleakpro.settings_hostinger')
     else:
         os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'smartleakpro.settings_simple')
     
