@@ -2,9 +2,9 @@
 Intervention models for SmartLeakPro application.
 """
 from django.db import models
-from django.contrib.gis.db import models as gis_models
+# from django.contrib.gis.db import models as gis_models
 from django.utils import timezone
-from apps.core.models import User
+from django.contrib.auth.models import User
 from apps.clients.models import Client, ClientSite
 
 
@@ -58,7 +58,7 @@ class Intervention(models.Model):
                                   related_name='created_interventions', verbose_name="Créé par")
     
     # Location information
-    location = gis_models.PointField(blank=True, null=True, verbose_name="Localisation")
+    latitude = models.FloatField(blank=True, null=True, verbose_name="Localisation")
     address = models.TextField(blank=True, null=True, verbose_name="Adresse")
     
     # Additional information
@@ -153,7 +153,7 @@ class InterventionDocument(models.Model):
     description = models.TextField(blank=True, null=True, verbose_name="Description")
     
     # Location information
-    location = gis_models.PointField(blank=True, null=True, verbose_name="Localisation")
+    latitude = models.FloatField(blank=True, null=True, verbose_name="Localisation")
     
     # Metadata
     uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)

@@ -6,11 +6,10 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
-from django.contrib.gis.geos import Point
-from .models import Client, ClientSite, ClientDocument, ClientNote
+# from django.contrib.gis.geos import Point
+from .models import Client, ClientSite, ClientDocument
 from .serializers import (
-    ClientSerializer, ClientDetailSerializer, ClientSiteSerializer,
-    ClientDocumentSerializer, ClientNoteSerializer
+    ClientSerializer, ClientSiteSerializer, ClientDocumentSerializer
 )
 
 

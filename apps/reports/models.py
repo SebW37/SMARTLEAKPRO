@@ -103,7 +103,7 @@ class InterventionReport(models.Model):
     ]
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    intervention = models.ForeignKey('interventions.Intervention', on_delete=models.CASCADE, related_name='reports')
+    # intervention = models.ForeignKey('interventions.Intervention', on_delete=models.CASCADE, related_name='reports')
     template = models.ForeignKey(ReportTemplate, on_delete=models.CASCADE, related_name='reports')
     
     # Report metadata
