@@ -1,0 +1,377 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - SmartLeakPro{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<style>
+    .template-header {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        border-radius: 8px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .type-badge {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+    }
+    .type-standard { background-color: #007bff; color: white; }
+    .type-emergency { background-color: #dc3545; color: white; }
+    .type-maintenance { background-color: #28a745; color: white; }
+    .type-inspection { background-color: #ffc107; color: black; }
+    .type-custom { background-color: #6c757d; color: white; }
+    .section-item {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: #f8f9fa;
+    }
+    .section-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    .section-title {
+        font-weight: 600;
+        color: #007bff;
+        margin: 0;
+    }
+    .section-type {
+        background: #e9ecef;
+        color: #495057;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+    }
+    .section-required {
+        background: #dc3545;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+    }
+    .section-description {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Template Header -->
+    <div class="template-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="h2 mb-2">
+                    <i class="fas fa-cog me-2"></i>
+                    {{ template.name }}
+                </h1>
+                <p class="mb-0 opacity-75">{{ template.description }}</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <span class="type-badge type-{{ template.type }}">
+                    {{ template.type|title }}
+                </span>
+                <div class="mt-2">
+                    <small class="opacity-75">Modèle #{{ template.id }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <a href="{% url 'reports:template_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                    </a>
+                </div>
+                <div>
+                    <button class="btn btn-primary" onclick="editTemplate()">
+                        <i class="fas fa-edit me-2"></i>Modifier
+                    </button>
+                    <button class="btn btn-success" onclick="useTemplate()">
+                        <i class="fas fa-plus me-2"></i>Utiliser ce modèle
+                    </button>
+                    <button class="btn btn-info" onclick="duplicateTemplate()">
+                        <i class="fas fa-copy me-2"></i>Dupliquer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Template Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Informations du Modèle
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <strong>Nom:</strong> {{ template.name }}
+                            </div>
+                            <div class="mb-3">
+                                <strong>Type:</strong> 
+                                <span class="type-badge type-{{ template.type }}">
+                                    {{ template.type|title }}
+                                </span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Description:</strong> {{ template.description }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <strong>Nombre de sections:</strong> {{ template.sections|length }}
+                            </div>
+                            <div class="mb-3">
+                                <strong>Statut:</strong> 
+                                <span class="badge bg-success">Actif</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Dernière modification:</strong> Aujourd'hui
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Template Sections -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list me-2"></i>Sections du Modèle
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if template.sections %}
+                        {% for section in template.sections %}
+                        <div class="section-item">
+                            <div class="section-header">
+                                <h6 class="section-title">
+                                    <i class="fas fa-{{ section.type|default:'file' }} me-2"></i>
+                                    {{ section.title }}
+                                </h6>
+                                <div>
+                                    <span class="section-type">{{ section.type|title }}</span>
+                                    {% if section.required %}
+                                    <span class="section-required ms-2">Requis</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <p class="section-description">
+                                {% if section.type == 'text' %}
+                                    Champ de texte simple pour saisir des informations.
+                                {% elif section.type == 'textarea' %}
+                                    Zone de texte étendue pour des descriptions détaillées.
+                                {% elif section.type == 'checklist' %}
+                                    Liste de cases à cocher pour vérifier des éléments.
+                                {% elif section.type == 'photo' %}
+                                    Zone de téléchargement d'images avec géolocalisation.
+                                {% elif section.type == 'signature' %}
+                                    Zone de signature électronique pour validation.
+                                {% else %}
+                                    Section personnalisée du modèle.
+                                {% endif %}
+                            </p>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-list fa-2x text-muted mb-3"></i>
+                            <h6 class="text-muted">Aucune section définie</h6>
+                            <p class="text-muted">Ce modèle ne contient pas encore de sections.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-bolt me-2"></i>Actions Rapides
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary" onclick="addSection()">
+                            <i class="fas fa-plus me-2"></i>Ajouter une section
+                        </button>
+                        <button class="btn btn-outline-warning" onclick="reorderSections()">
+                            <i class="fas fa-sort me-2"></i>Réorganiser
+                        </button>
+                        <button class="btn btn-outline-info" onclick="previewTemplate()">
+                            <i class="fas fa-eye me-2"></i>Aperçu
+                        </button>
+                        <button class="btn btn-outline-success" onclick="testTemplate()">
+                            <i class="fas fa-play me-2"></i>Tester
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Template Statistics -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Statistiques
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h4 class="text-primary">{{ template.sections|length }}</h4>
+                            <small class="text-muted">Sections</small>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success">0</h4>
+                            <small class="text-muted">Utilisations</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Template History -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-history me-2"></i>Historique
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-primary"></div>
+                            <div class="timeline-content">
+                                <h6 class="timeline-title">Modèle créé</h6>
+                                <p class="timeline-text">Modèle initial créé</p>
+                                <small class="text-muted">Aujourd'hui</small>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-warning"></div>
+                            <div class="timeline-content">
+                                <h6 class="timeline-title">Section ajoutée</h6>
+                                <p class="timeline-text">Nouvelle section "Photos"</p>
+                                <small class="text-muted">Il y a 1 heure</small>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-info"></div>
+                            <div class="timeline-content">
+                                <h6 class="timeline-title">Modèle modifié</h6>
+                                <p class="timeline-text">Description mise à jour</p>
+                                <small class="text-muted">Il y a 2 heures</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function editTemplate() {
+    alert('Fonctionnalité de modification de modèle à implémenter.');
+}
+
+function useTemplate() {
+    if (confirm('Voulez-vous utiliser ce modèle pour créer un nouveau rapport ?')) {
+        window.location.href = '{% url "reports:report_create" %}?template={{ template.id }}';
+    }
+}
+
+function duplicateTemplate() {
+    if (confirm('Voulez-vous dupliquer ce modèle ?')) {
+        alert('Fonctionnalité de duplication à implémenter.');
+    }
+}
+
+function addSection() {
+    alert('Fonctionnalité d\'ajout de section à implémenter.');
+}
+
+function reorderSections() {
+    alert('Fonctionnalité de réorganisation à implémenter.');
+}
+
+function previewTemplate() {
+    alert('Fonctionnalité d\'aperçu à implémenter.');
+}
+
+function testTemplate() {
+    alert('Fonctionnalité de test à implémenter.');
+}
+</script>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.5rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -1.5rem;
+    top: 0.25rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px #dee2e6;
+}
+
+.timeline-content {
+    margin-left: 0.5rem;
+}
+
+.timeline-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.timeline-text {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+}
+</style>
+{% endblock %}

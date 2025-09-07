@@ -1,0 +1,321 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - SmartLeakPro{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<style>
+    .form-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #007bff;
+    }
+    .form-section h5 {
+        color: #007bff;
+        margin-bottom: 1rem;
+    }
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+    .form-floating {
+        margin-bottom: 1rem;
+    }
+    .btn-group-custom {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-plus-circle text-primary me-2"></i>
+                        {{ page_title }}
+                    </h1>
+                    <p class="text-muted mb-0">Créez un nouveau rapport d'intervention</p>
+                </div>
+                <div>
+                    <a href="{% url 'reports:report_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <div class="row">
+        <div class="col-lg-8">
+            <form method="post" id="reportForm">
+                {% csrf_token %}
+                
+                <!-- Basic Information -->
+                <div class="form-section">
+                    <h5><i class="fas fa-info-circle me-2"></i>Informations Générales</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="title" name="title" placeholder="Titre du rapport" required>
+                                <label for="title" class="required-field">Titre du rapport</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="template" name="template" required>
+                                    <option value="">Sélectionner un modèle</option>
+                                    <option value="standard">Inspection Standard</option>
+                                    <option value="emergency">Urgence Fuite</option>
+                                    <option value="maintenance">Maintenance Préventive</option>
+                                    <option value="custom">Personnalisé</option>
+                                </select>
+                                <label for="template" class="required-field">Modèle de rapport</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="client" name="client" required>
+                                    <option value="">Sélectionner un client</option>
+                                    <option value="Client ABC">Client ABC</option>
+                                    <option value="Client XYZ">Client XYZ</option>
+                                    <option value="Client DEF">Client DEF</option>
+                                </select>
+                                <label for="client" class="required-field">Client</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="site" name="site" required>
+                                    <option value="">Sélectionner un site</option>
+                                    <option value="Site Principal">Site Principal</option>
+                                    <option value="Site Secondaire">Site Secondaire</option>
+                                    <option value="Site Industriel">Site Industriel</option>
+                                </select>
+                                <label for="site" class="required-field">Site</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-floating">
+                        <textarea class="form-control" id="description" name="description" placeholder="Description" style="height: 100px"></textarea>
+                        <label for="description">Description</label>
+                    </div>
+                </div>
+
+                <!-- Intervention Details -->
+                <div class="form-section">
+                    <h5><i class="fas fa-tools me-2"></i>Détails de l'Intervention</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="date" class="form-control" id="intervention_date" name="intervention_date" required>
+                                <label for="intervention_date" class="required-field">Date d'intervention</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="time" class="form-control" id="intervention_time" name="intervention_time" required>
+                                <label for="intervention_time" class="required-field">Heure d'intervention</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="intervention_type" name="intervention_type" required>
+                                    <option value="">Type d'intervention</option>
+                                    <option value="routine">Inspection de routine</option>
+                                    <option value="emergency">Intervention d'urgence</option>
+                                    <option value="maintenance">Maintenance préventive</option>
+                                    <option value="repair">Réparation</option>
+                                </select>
+                                <label for="intervention_type" class="required-field">Type d'intervention</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="priority" name="priority" required>
+                                    <option value="">Priorité</option>
+                                    <option value="low">Faible</option>
+                                    <option value="medium">Moyenne</option>
+                                    <option value="high">Élevée</option>
+                                    <option value="urgent">Urgente</option>
+                                </select>
+                                <label for="priority" class="required-field">Priorité</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location -->
+                <div class="form-section">
+                    <h5><i class="fas fa-map-marker-alt me-2"></i>Localisation</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="address" name="address" placeholder="Adresse">
+                                <label for="address">Adresse</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="city" name="city" placeholder="Ville">
+                                <label for="city">Ville</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="postal_code" name="postal_code" placeholder="Code postal">
+                                <label for="postal_code">Code postal</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="country" name="country" placeholder="Pays" value="France">
+                                <label for="country">Pays</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="form-section">
+                    <h5><i class="fas fa-cogs me-2"></i>Actions</h5>
+                    <div class="btn-group-custom">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Créer le Rapport
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="saveDraft()">
+                            <i class="fas fa-file-alt me-2"></i>Sauvegarder comme Brouillon
+                        </button>
+                        <button type="button" class="btn btn-outline-warning" onclick="previewReport()">
+                            <i class="fas fa-eye me-2"></i>Aperçu
+                        </button>
+                        <a href="{% url 'reports:report_list' %}" class="btn btn-outline-danger">
+                            <i class="fas fa-times me-2"></i>Annuler
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Informations
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <strong>Conseil:</strong> Remplissez tous les champs obligatoires pour créer un rapport complet.
+                    </div>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Note:</strong> Vous pourrez modifier le rapport après sa création.
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-history me-2"></i>Rapports Récents
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item px-0">
+                            <div class="d-flex justify-content-between">
+                                <small>Rapport d'inspection - Site A</small>
+                                <small class="text-muted">Aujourd'hui</small>
+                            </div>
+                        </div>
+                        <div class="list-group-item px-0">
+                            <div class="d-flex justify-content-between">
+                                <small>Rapport d'urgence - Fuite majeure</small>
+                                <small class="text-muted">Hier</small>
+                            </div>
+                        </div>
+                        <div class="list-group-item px-0">
+                            <div class="d-flex justify-content-between">
+                                <small>Rapport de maintenance préventive</small>
+                                <small class="text-muted">Il y a 2 jours</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set today's date as default
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('intervention_date').value = today;
+    
+    // Set current time as default
+    const now = new Date();
+    const timeString = now.toTimeString().slice(0, 5);
+    document.getElementById('intervention_time').value = timeString;
+    
+    // Form validation
+    const form = document.getElementById('reportForm');
+    form.addEventListener('submit', function(e) {
+        const requiredFields = form.querySelectorAll('[required]');
+        let isValid = true;
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            alert('Veuillez remplir tous les champs obligatoires.');
+        }
+    });
+    
+    // Remove invalid class on input
+    const inputs = form.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            this.classList.remove('is-invalid');
+        });
+    });
+});
+
+function saveDraft() {
+    // Save as draft functionality
+    alert('Fonctionnalité de sauvegarde en brouillon à implémenter.');
+}
+
+function previewReport() {
+    // Preview functionality
+    alert('Fonctionnalité d\'aperçu à implémenter.');
+}
+</script>
+{% endblock %}

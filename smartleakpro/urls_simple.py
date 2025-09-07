@@ -21,7 +21,7 @@ from django.http import HttpResponse
 
 def home(request):
     """Home view with statistics."""
-    from clients.models import Client, ClientSite
+    from apps.clients.models import Client, ClientSite
     from django.shortcuts import render
     
     total_clients = Client.objects.filter(is_active=True).count()
@@ -36,8 +36,8 @@ def home(request):
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home, name='home'),
-    path('clients/', include('clients.urls')),
-    path('interventions/', include('interventions.urls')),
-    path('reports/', include('apps.reports.urls_minimal')),
+    path('clients/', include('apps.clients.urls')),
+    path('interventions/', include('apps.interventions.urls')),
+    path('reports/', include('apps.reports.urls_simple')),
     path('api/', include('apps.reports.urls')),
 ]

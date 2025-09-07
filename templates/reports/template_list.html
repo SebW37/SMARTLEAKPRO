@@ -1,0 +1,334 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - SmartLeakPro{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<style>
+    .template-card {
+        transition: transform 0.2s ease-in-out;
+        border-left: 4px solid #007bff;
+    }
+    .template-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .template-type-badge {
+        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+    }
+    .type-standard { background-color: #007bff; color: white; }
+    .type-emergency { background-color: #dc3545; color: white; }
+    .type-maintenance { background-color: #28a745; color: white; }
+    .type-inspection { background-color: #ffc107; color: black; }
+    .type-custom { background-color: #6c757d; color: white; }
+    .sections-count {
+        background: #e9ecef;
+        color: #495057;
+        padding: 0.25rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-cog text-primary me-2"></i>
+                        {{ page_title }}
+                    </h1>
+                    <p class="text-muted mb-0">Gérez vos modèles de rapports</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary" onclick="createTemplate()">
+                        <i class="fas fa-plus me-2"></i>Nouveau Modèle
+                    </button>
+                    <a href="{% url 'reports:report_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Retour aux rapports
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ total_templates|default:0 }}</h4>
+                            <p class="card-text">Total Modèles</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-cog fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ templates|length|default:0 }}</h4>
+                            <p class="card-text">Modèles Actifs</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">0</h4>
+                            <p class="card-text">Modèles Publics</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-globe fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">0</h4>
+                            <p class="card-text">Utilisations</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-chart-bar fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="typeFilter" class="form-label">Type</label>
+                            <select class="form-select" id="typeFilter">
+                                <option value="">Tous les types</option>
+                                <option value="standard">Standard</option>
+                                <option value="emergency">Urgence</option>
+                                <option value="maintenance">Maintenance</option>
+                                <option value="inspection">Inspection</option>
+                                <option value="custom">Personnalisé</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="statusFilter" class="form-label">Statut</label>
+                            <select class="form-select" id="statusFilter">
+                                <option value="">Tous les statuts</option>
+                                <option value="active">Actif</option>
+                                <option value="inactive">Inactif</option>
+                                <option value="public">Public</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="searchFilter" class="form-label">Recherche</label>
+                            <input type="text" class="form-control" id="searchFilter" placeholder="Rechercher...">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="sortFilter" class="form-label">Trier par</label>
+                            <select class="form-select" id="sortFilter">
+                                <option value="name">Nom</option>
+                                <option value="type">Type</option>
+                                <option value="created">Date de création</option>
+                                <option value="sections">Nombre de sections</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Templates List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list me-2"></i>Liste des Modèles
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if templates %}
+                        <div class="row">
+                            {% for template in templates %}
+                            <div class="col-md-6 col-lg-4 mb-4">
+                                <div class="card template-card h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h6 class="card-title">{{ template.name }}</h6>
+                                            <span class="template-type-badge type-{{ template.type }}">
+                                                {{ template.type|title }}
+                                            </span>
+                                        </div>
+                                        <p class="card-text text-muted small mb-3">
+                                            {{ template.description }}
+                                        </p>
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="sections-count">
+                                                <i class="fas fa-list me-1"></i>
+                                                {{ template.sections_count }} sections
+                                            </span>
+                                            <span class="badge bg-{{ template.is_active|yesno:'success,secondary' }}">
+                                                {{ template.is_active|yesno:'Actif,Inactif' }}
+                                            </span>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">#{{ template.id }}</small>
+                                            <div>
+                                                <a href="{% url 'reports:template_detail' template.id %}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye me-1"></i>Voir
+                                                </a>
+                                                <button class="btn btn-sm btn-outline-secondary" onclick="editTemplate({{ template.id }})">
+                                                    <i class="fas fa-edit me-1"></i>Modifier
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-cog fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Aucun modèle trouvé</h5>
+                            <p class="text-muted">Commencez par créer votre premier modèle de rapport.</p>
+                            <button class="btn btn-primary" onclick="createTemplate()">
+                                <i class="fas fa-plus me-2"></i>Créer un Modèle
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Filter functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const typeFilter = document.getElementById('typeFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    const searchFilter = document.getElementById('searchFilter');
+    const sortFilter = document.getElementById('sortFilter');
+    
+    function applyFilters() {
+        const templates = document.querySelectorAll('.template-card');
+        const typeValue = typeFilter.value;
+        const statusValue = statusFilter.value;
+        const searchValue = searchFilter.value.toLowerCase();
+        
+        templates.forEach(template => {
+            let show = true;
+            
+            // Type filter
+            if (typeValue) {
+                const typeBadge = template.querySelector('.template-type-badge');
+                if (!typeBadge.classList.contains(`type-${typeValue}`)) {
+                    show = false;
+                }
+            }
+            
+            // Status filter
+            if (statusValue) {
+                const statusBadge = template.querySelector('.badge');
+                if (statusValue === 'active' && !statusBadge.classList.contains('bg-success')) {
+                    show = false;
+                } else if (statusValue === 'inactive' && !statusBadge.classList.contains('bg-secondary')) {
+                    show = false;
+                } else if (statusValue === 'public' && !template.textContent.includes('Public')) {
+                    show = false;
+                }
+            }
+            
+            // Search filter
+            if (searchValue) {
+                const templateText = template.textContent.toLowerCase();
+                if (!templateText.includes(searchValue)) {
+                    show = false;
+                }
+            }
+            
+            template.style.display = show ? 'block' : 'none';
+        });
+    }
+    
+    function sortTemplates() {
+        const container = document.querySelector('.row');
+        const templates = Array.from(container.querySelectorAll('.template-card'));
+        const sortValue = sortFilter.value;
+        
+        templates.sort((a, b) => {
+            let aValue, bValue;
+            
+            switch(sortValue) {
+                case 'name':
+                    aValue = a.querySelector('.card-title').textContent;
+                    bValue = b.querySelector('.card-title').textContent;
+                    break;
+                case 'type':
+                    aValue = a.querySelector('.template-type-badge').textContent;
+                    bValue = b.querySelector('.template-type-badge').textContent;
+                    break;
+                case 'sections':
+                    aValue = parseInt(a.querySelector('.sections-count').textContent);
+                    bValue = parseInt(b.querySelector('.sections-count').textContent);
+                    break;
+                default:
+                    return 0;
+            }
+            
+            if (aValue < bValue) return -1;
+            if (aValue > bValue) return 1;
+            return 0;
+        });
+        
+        templates.forEach(template => container.appendChild(template));
+    }
+    
+    typeFilter.addEventListener('change', applyFilters);
+    statusFilter.addEventListener('change', applyFilters);
+    searchFilter.addEventListener('input', applyFilters);
+    sortFilter.addEventListener('change', sortTemplates);
+});
+
+function createTemplate() {
+    alert('Fonctionnalité de création de modèle à implémenter.');
+}
+
+function editTemplate(templateId) {
+    alert(`Fonctionnalité de modification de modèle ${templateId} à implémenter.`);
+}
+</script>
+{% endblock %}

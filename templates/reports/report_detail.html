@@ -1,0 +1,386 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - SmartLeakPro{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<style>
+    .report-header {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        border-radius: 8px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .status-badge {
+        font-size: 0.9rem;
+        padding: 0.5rem 1rem;
+    }
+    .status-draft { background-color: #6c757d; color: white; }
+    .status-in_progress { background-color: #ffc107; color: black; }
+    .status-completed { background-color: #28a745; color: white; }
+    .status-pending_review { background-color: #17a2b8; color: white; }
+    .status-approved { background-color: #28a745; color: white; }
+    .status-rejected { background-color: #dc3545; color: white; }
+    .status-archived { background-color: #6c757d; color: white; }
+    .section-card {
+        border-left: 4px solid #007bff;
+        margin-bottom: 1.5rem;
+    }
+    .section-header {
+        background: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        padding: 1rem;
+        font-weight: 600;
+    }
+    .section-body {
+        padding: 1.5rem;
+    }
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+    .info-item:last-child {
+        border-bottom: none;
+    }
+    .info-label {
+        font-weight: 600;
+        color: #6c757d;
+    }
+    .info-value {
+        color: #495057;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Report Header -->
+    <div class="report-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="h2 mb-2">
+                    <i class="fas fa-file-alt me-2"></i>
+                    {{ report.title }}
+                </h1>
+                <p class="mb-0 opacity-75">{{ report.description }}</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <span class="badge status-badge status-{{ report.status }}">
+                    {{ report.status|title }}
+                </span>
+                <div class="mt-2">
+                    <small class="opacity-75">Rapport #{{ report.id }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <a href="{% url 'reports:report_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                    </a>
+                </div>
+                <div>
+                    <a href="{% url 'reports:report_edit' report.id %}" class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i>Modifier
+                    </a>
+                    <button class="btn btn-success" onclick="exportReport()">
+                        <i class="fas fa-download me-2"></i>Exporter
+                    </button>
+                    <button class="btn btn-info" onclick="shareReport()">
+                        <i class="fas fa-share me-2"></i>Partager
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Report Information -->
+            <div class="card section-card">
+                <div class="section-header">
+                    <i class="fas fa-info-circle me-2"></i>Informations Générales
+                </div>
+                <div class="section-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <span class="info-label">Client:</span>
+                                <span class="info-value">{{ report.client }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Site:</span>
+                                <span class="info-value">{{ report.site }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Créé par:</span>
+                                <span class="info-value">{{ report.created_by }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <span class="info-label">Date de création:</span>
+                                <span class="info-value">{{ report.created_at }}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Statut:</span>
+                                <span class="info-value">
+                                    <span class="badge status-badge status-{{ report.status }}">
+                                        {{ report.status|title }}
+                                    </span>
+                                </span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Version:</span>
+                                <span class="info-value">1.0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Sections -->
+            {% if report.sections %}
+            <div class="card section-card">
+                <div class="section-header">
+                    <i class="fas fa-list me-2"></i>Contenu du Rapport
+                </div>
+                <div class="section-body">
+                    {% for section in report.sections %}
+                    <div class="mb-4">
+                        <h6 class="text-primary">
+                            <i class="fas fa-{{ section.type|default:'file' }} me-2"></i>
+                            {{ section.title }}
+                        </h6>
+                        <div class="p-3 bg-light rounded">
+                            {% if section.type == 'photo' %}
+                                <div class="text-center">
+                                    <i class="fas fa-image fa-2x text-muted mb-2"></i>
+                                    <p class="text-muted">{{ section.value }}</p>
+                                </div>
+                            {% elif section.type == 'checklist' %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" checked disabled>
+                                    <label class="form-check-label">{{ section.value }}</label>
+                                </div>
+                            {% else %}
+                                <p class="mb-0">{{ section.value }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Comments/Notes -->
+            <div class="card section-card">
+                <div class="section-header">
+                    <i class="fas fa-comments me-2"></i>Commentaires et Notes
+                </div>
+                <div class="section-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Aucun commentaire pour le moment. Utilisez le bouton "Modifier" pour ajouter des commentaires.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-bolt me-2"></i>Actions Rapides
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary" onclick="duplicateReport()">
+                            <i class="fas fa-copy me-2"></i>Dupliquer
+                        </button>
+                        <button class="btn btn-outline-warning" onclick="changeStatus()">
+                            <i class="fas fa-edit me-2"></i>Changer le statut
+                        </button>
+                        <button class="btn btn-outline-info" onclick="addComment()">
+                            <i class="fas fa-comment me-2"></i>Ajouter un commentaire
+                        </button>
+                        <button class="btn btn-outline-success" onclick="requestApproval()">
+                            <i class="fas fa-check me-2"></i>Demander approbation
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report History -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-history me-2"></i>Historique
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-primary"></div>
+                            <div class="timeline-content">
+                                <h6 class="timeline-title">Rapport créé</h6>
+                                <p class="timeline-text">Par {{ report.created_by }}</p>
+                                <small class="text-muted">{{ report.created_at }}</small>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-warning"></div>
+                            <div class="timeline-content">
+                                <h6 class="timeline-title">Statut modifié</h6>
+                                <p class="timeline-text">Passé en {{ report.status }}</p>
+                                <small class="text-muted">Aujourd'hui</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export Options -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-download me-2"></i>Exporter
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-danger" onclick="exportPDF()">
+                            <i class="fas fa-file-pdf me-2"></i>PDF
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="exportWord()">
+                            <i class="fas fa-file-word me-2"></i>Word
+                        </button>
+                        <button class="btn btn-outline-success" onclick="exportHTML()">
+                            <i class="fas fa-file-code me-2"></i>HTML
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="exportJSON()">
+                            <i class="fas fa-file-code me-2"></i>JSON
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function exportReport() {
+    alert('Fonctionnalité d\'export à implémenter.');
+}
+
+function shareReport() {
+    alert('Fonctionnalité de partage à implémenter.');
+}
+
+function duplicateReport() {
+    if (confirm('Voulez-vous dupliquer ce rapport ?')) {
+        alert('Fonctionnalité de duplication à implémenter.');
+    }
+}
+
+function changeStatus() {
+    const newStatus = prompt('Nouveau statut:', '{{ report.status }}');
+    if (newStatus) {
+        alert('Fonctionnalité de changement de statut à implémenter.');
+    }
+}
+
+function addComment() {
+    const comment = prompt('Ajouter un commentaire:');
+    if (comment) {
+        alert('Fonctionnalité d\'ajout de commentaire à implémenter.');
+    }
+}
+
+function requestApproval() {
+    if (confirm('Voulez-vous demander l\'approbation de ce rapport ?')) {
+        alert('Fonctionnalité de demande d\'approbation à implémenter.');
+    }
+}
+
+function exportPDF() {
+    alert('Export PDF à implémenter.');
+}
+
+function exportWord() {
+    alert('Export Word à implémenter.');
+}
+
+function exportHTML() {
+    alert('Export HTML à implémenter.');
+}
+
+function exportJSON() {
+    alert('Export JSON à implémenter.');
+}
+</script>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.5rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -1.5rem;
+    top: 0.25rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 0 0 2px #dee2e6;
+}
+
+.timeline-content {
+    margin-left: 0.5rem;
+}
+
+.timeline-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.timeline-text {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+}
+</style>
+{% endblock %}

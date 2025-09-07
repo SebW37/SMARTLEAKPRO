@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Rapports d'Intervention - SmartLeakPro{% endblock %}
+{% block title %}{{ page_title }} - SmartLeakPro{% endblock %}
 
 {% block extra_css %}
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 <style>
     .report-card {
-        transition: transform 0.2s;
+        transition: transform 0.2s ease-in-out;
         border-left: 4px solid #007bff;
     }
     .report-card:hover {
@@ -15,12 +15,13 @@
         box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
     .status-badge {
-        font-size: 0.8em;
+        font-size: 0.8rem;
         padding: 0.25rem 0.5rem;
     }
     .status-draft { background-color: #6c757d; color: white; }
-    .status-in-progress { background-color: #17a2b8; color: white; }
-    .status-pending-review { background-color: #ffc107; color: black; }
+    .status-in_progress { background-color: #ffc107; color: black; }
+    .status-completed { background-color: #28a745; color: white; }
+    .status-pending_review { background-color: #17a2b8; color: white; }
     .status-approved { background-color: #28a745; color: white; }
     .status-rejected { background-color: #dc3545; color: white; }
     .status-archived { background-color: #6c757d; color: white; }
@@ -29,357 +30,263 @@
 
 {% block content %}
 <div class="container-fluid">
-    <div class="row">
+    <!-- Header -->
+    <div class="row mb-4">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1><i class="fas fa-file-alt text-primary"></i> Rapports d'Intervention</h1>
+            <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <button class="btn btn-primary" onclick="createNewReport()">
-                        <i class="fas fa-plus"></i> Nouveau Rapport
-                    </button>
-                    <button class="btn btn-outline-secondary" onclick="openTemplateManager()">
-                        <i class="fas fa-cog"></i> Gérer les Modèles
-                    </button>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-file-alt text-primary me-2"></i>
+                        {{ page_title }}
+                    </h1>
+                    <p class="text-muted mb-0">Gérez vos rapports d'intervention</p>
+                </div>
+                <div>
+                    <a href="{% url 'reports:report_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Nouveau Rapport
+                    </a>
+                    <a href="{% url 'reports:template_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-cog me-2"></i>Modèles
+                    </a>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- Filters -->
-            <div class="card mb-4">
+    <!-- Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ total_reports|default:0 }}</h4>
+                            <p class="card-text">Total Rapports</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-file-alt fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">{{ reports|length|default:0 }}</h4>
+                            <p class="card-text">Rapports Actifs</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-check-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">0</h4>
+                            <p class="card-text">En Cours</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-clock fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="card-title">0</h4>
+                            <p class="card-text">En Attente</p>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-hourglass-half fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-3">
                             <label for="statusFilter" class="form-label">Statut</label>
-                            <select class="form-select" id="statusFilter" onchange="filterReports()">
+                            <select class="form-select" id="statusFilter">
                                 <option value="">Tous les statuts</option>
                                 <option value="draft">Brouillon</option>
                                 <option value="in_progress">En cours</option>
-                                <option value="pending_review">En attente de validation</option>
+                                <option value="completed">Terminé</option>
+                                <option value="pending_review">En attente</option>
                                 <option value="approved">Approuvé</option>
                                 <option value="rejected">Rejeté</option>
-                                <option value="archived">Archivé</option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label for="templateFilter" class="form-label">Modèle</label>
-                            <select class="form-select" id="templateFilter" onchange="filterReports()">
-                                <option value="">Tous les modèles</option>
-                                <!-- Options will be populated by JavaScript -->
+                            <label for="clientFilter" class="form-label">Client</label>
+                            <select class="form-select" id="clientFilter">
+                                <option value="">Tous les clients</option>
+                                <option value="Client ABC">Client ABC</option>
+                                <option value="Client XYZ">Client XYZ</option>
+                                <option value="Client DEF">Client DEF</option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label for="dateFilter" class="form-label">Période</label>
-                            <select class="form-select" id="dateFilter" onchange="filterReports()">
-                                <option value="">Toutes les périodes</option>
-                                <option value="today">Aujourd'hui</option>
-                                <option value="week">Cette semaine</option>
-                                <option value="month">Ce mois</option>
-                                <option value="year">Cette année</option>
-                            </select>
+                            <label for="dateFilter" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="dateFilter">
                         </div>
                         <div class="col-md-3">
-                            <label for="searchInput" class="form-label">Recherche</label>
-                            <input type="text" class="form-control" id="searchInput" placeholder="Titre, intervention..." onkeyup="filterReports()">
+                            <label for="searchFilter" class="form-label">Recherche</label>
+                            <input type="text" class="form-control" id="searchFilter" placeholder="Rechercher...">
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- Reports List -->
-            <div class="row" id="reportsList">
-                <!-- Reports will be loaded here by JavaScript -->
-                <div class="col-12 text-center">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Chargement...</span>
-                    </div>
+    <!-- Reports List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list me-2"></i>Liste des Rapports
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if reports %}
+                        <div class="row">
+                            {% for report in reports %}
+                            <div class="col-md-6 col-lg-4 mb-4">
+                                <div class="card report-card h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h6 class="card-title">{{ report.title }}</h6>
+                                            <span class="badge status-badge status-{{ report.status }}">
+                                                {{ report.status|title }}
+                                            </span>
+                                        </div>
+                                        <p class="card-text text-muted small">
+                                            <i class="fas fa-building me-1"></i>{{ report.client }}<br>
+                                            <i class="fas fa-map-marker-alt me-1"></i>{{ report.site }}<br>
+                                            <i class="fas fa-user me-1"></i>{{ report.created_by }}<br>
+                                            <i class="fas fa-calendar me-1"></i>{{ report.created_at }}
+                                        </p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">#{{ report.id }}</small>
+                                            <div>
+                                                <a href="{% url 'reports:report_detail' report.id %}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye me-1"></i>Voir
+                                                </a>
+                                                <a href="{% url 'reports:report_edit' report.id %}" class="btn btn-sm btn-outline-secondary">
+                                                    <i class="fas fa-edit me-1"></i>Modifier
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Aucun rapport trouvé</h5>
+                            <p class="text-muted">Commencez par créer votre premier rapport d'intervention.</p>
+                            <a href="{% url 'reports:report_create' %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Créer un Rapport
+                            </a>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
-
-            <!-- Pagination -->
-            <nav aria-label="Pagination des rapports" class="mt-4">
-                <ul class="pagination justify-content-center" id="pagination">
-                    <!-- Pagination will be generated by JavaScript -->
-                </ul>
-            </nav>
         </div>
     </div>
 </div>
 
-<!-- Report Actions Modal -->
-<div class="modal fade" id="reportActionsModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Actions du Rapport</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="d-grid gap-2">
-                    <button class="btn btn-primary" onclick="editReport()">
-                        <i class="fas fa-edit"></i> Modifier
-                    </button>
-                    <button class="btn btn-info" onclick="previewReport()">
-                        <i class="fas fa-eye"></i> Prévisualiser
-                    </button>
-                    <button class="btn btn-success" onclick="exportReport()">
-                        <i class="fas fa-download"></i> Exporter
-                    </button>
-                    <button class="btn btn-warning" onclick="signReport()">
-                        <i class="fas fa-signature"></i> Signer
-                    </button>
-                    <button class="btn btn-secondary" onclick="shareReport()">
-                        <i class="fas fa-share"></i> Partager
-                    </button>
-                    <button class="btn btn-danger" onclick="deleteReport()">
-                        <i class="fas fa-trash"></i> Supprimer
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+<!-- Success Message -->
+{% if message %}
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="fas fa-check-circle me-2"></i>
+    <strong>{{ success_message|default:"Succès" }}!</strong> {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
+{% endif %}
 {% endblock %}
 
 {% block extra_js %}
 <script>
-let currentReportId = null;
-let reports = [];
-let templates = [];
-
-// Load reports on page load
+// Filter functionality
 document.addEventListener('DOMContentLoaded', function() {
-    loadReports();
-    loadTemplates();
-});
-
-// Load reports from API
-async function loadReports() {
-    try {
-        const response = await fetch('/api/reports/');
-        const data = await response.json();
-        reports = data.results || data;
-        renderReports();
-    } catch (error) {
-        console.error('Error loading reports:', error);
-        showError('Erreur lors du chargement des rapports');
-    }
-}
-
-// Load templates for filter
-async function loadTemplates() {
-    try {
-        const response = await fetch('/api/templates/');
-        const data = await response.json();
-        templates = data.results || data;
-        populateTemplateFilter();
-    } catch (error) {
-        console.error('Error loading templates:', error);
-    }
-}
-
-// Populate template filter dropdown
-function populateTemplateFilter() {
-    const templateFilter = document.getElementById('templateFilter');
-    templateFilter.innerHTML = '<option value="">Tous les modèles</option>';
+    const statusFilter = document.getElementById('statusFilter');
+    const clientFilter = document.getElementById('clientFilter');
+    const dateFilter = document.getElementById('dateFilter');
+    const searchFilter = document.getElementById('searchFilter');
     
-    templates.forEach(template => {
-        const option = document.createElement('option');
-        option.value = template.id;
-        option.textContent = template.name;
-        templateFilter.appendChild(option);
-    });
-}
-
-// Render reports list
-function renderReports(filteredReports = null) {
-    const reportsList = document.getElementById('reportsList');
-    const reportsToRender = filteredReports || reports;
-    
-    if (reportsToRender.length === 0) {
-        reportsList.innerHTML = `
-            <div class="col-12 text-center">
-                <div class="card">
-                    <div class="card-body">
-                        <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
-                        <h5 class="text-muted">Aucun rapport trouvé</h5>
-                        <p class="text-muted">Commencez par créer votre premier rapport d'intervention.</p>
-                        <button class="btn btn-primary" onclick="createNewReport()">
-                            <i class="fas fa-plus"></i> Créer un rapport
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-        return;
-    }
-    
-    reportsList.innerHTML = reportsToRender.map(report => `
-        <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card report-card h-100" onclick="openReportActions('${report.id}')">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <h6 class="card-title mb-0">${report.title}</h6>
-                        <span class="badge status-${report.status} status-badge">${getStatusText(report.status)}</span>
-                    </div>
-                    <p class="card-text text-muted small mb-2">
-                        <i class="fas fa-calendar"></i> ${formatDate(report.created_at)}
-                    </p>
-                    <p class="card-text text-muted small mb-2">
-                        <i class="fas fa-user"></i> ${report.created_by_name || 'Utilisateur inconnu'}
-                    </p>
-                    <p class="card-text text-muted small mb-2">
-                        <i class="fas fa-file"></i> ${report.template_name || 'Modèle inconnu'}
-                    </p>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <small class="text-muted">v${report.version}</small>
-                        <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-primary btn-sm" onclick="event.stopPropagation(); editReport('${report.id}')">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-outline-info btn-sm" onclick="event.stopPropagation(); previewReport('${report.id}')">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn btn-outline-success btn-sm" onclick="event.stopPropagation(); exportReport('${report.id}')">
-                                <i class="fas fa-download"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `).join('');
-}
-
-// Filter reports
-function filterReports() {
-    const statusFilter = document.getElementById('statusFilter').value;
-    const templateFilter = document.getElementById('templateFilter').value;
-    const dateFilter = document.getElementById('dateFilter').value;
-    const searchInput = document.getElementById('searchInput').value.toLowerCase();
-    
-    let filteredReports = reports.filter(report => {
-        // Status filter
-        if (statusFilter && report.status !== statusFilter) return false;
+    function applyFilters() {
+        const reports = document.querySelectorAll('.report-card');
+        const statusValue = statusFilter.value;
+        const clientValue = clientFilter.value;
+        const dateValue = dateFilter.value;
+        const searchValue = searchFilter.value.toLowerCase();
         
-        // Template filter
-        if (templateFilter && report.template !== templateFilter) return false;
-        
-        // Search filter
-        if (searchInput && !report.title.toLowerCase().includes(searchInput)) return false;
-        
-        // Date filter
-        if (dateFilter) {
-            const reportDate = new Date(report.created_at);
-            const now = new Date();
-            let startDate;
+        reports.forEach(report => {
+            let show = true;
             
-            switch (dateFilter) {
-                case 'today':
-                    startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                    break;
-                case 'week':
-                    startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-                    break;
-                case 'month':
-                    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-                    break;
-                case 'year':
-                    startDate = new Date(now.getFullYear(), 0, 1);
-                    break;
+            // Status filter
+            if (statusValue) {
+                const statusBadge = report.querySelector('.status-badge');
+                if (!statusBadge.classList.contains(`status-${statusValue}`)) {
+                    show = false;
+                }
             }
             
-            if (reportDate < startDate) return false;
-        }
-        
-        return true;
-    });
-    
-    renderReports(filteredReports);
-}
-
-// Get status text in French
-function getStatusText(status) {
-    const statusMap = {
-        'draft': 'Brouillon',
-        'in_progress': 'En cours',
-        'pending_review': 'En attente',
-        'approved': 'Approuvé',
-        'rejected': 'Rejeté',
-        'archived': 'Archivé'
-    };
-    return statusMap[status] || status;
-}
-
-// Format date
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-}
-
-// Open report actions modal
-function openReportActions(reportId) {
-    currentReportId = reportId;
-    const modal = new bootstrap.Modal(document.getElementById('reportActionsModal'));
-    modal.show();
-}
-
-// Create new report
-function createNewReport() {
-    // Redirect to report creation page
-    window.location.href = '/reports/create/';
-}
-
-// Edit report
-function editReport(reportId = null) {
-    const id = reportId || currentReportId;
-    window.location.href = `/reports/${id}/edit/`;
-}
-
-// Preview report
-function previewReport(reportId = null) {
-    const id = reportId || currentReportId;
-    window.open(`/reports/${id}/preview/`, '_blank');
-}
-
-// Export report
-function exportReport(reportId = null) {
-    const id = reportId || currentReportId;
-    window.location.href = `/reports/${id}/export/`;
-}
-
-// Sign report
-function signReport() {
-    window.location.href = `/reports/${currentReportId}/sign/`;
-}
-
-// Share report
-function shareReport() {
-    // Implement sharing functionality
-    alert('Fonctionnalité de partage à implémenter');
-}
-
-// Delete report
-function deleteReport() {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce rapport ?')) {
-        // Implement delete functionality
-        alert('Fonctionnalité de suppression à implémenter');
+            // Client filter
+            if (clientValue) {
+                const clientText = report.querySelector('.card-text').textContent;
+                if (!clientText.includes(clientValue)) {
+                    show = false;
+                }
+            }
+            
+            // Search filter
+            if (searchValue) {
+                const reportText = report.textContent.toLowerCase();
+                if (!reportText.includes(searchValue)) {
+                    show = false;
+                }
+            }
+            
+            // Date filter (simplified)
+            if (dateValue) {
+                const dateText = report.querySelector('.card-text').textContent;
+                if (!dateText.includes(dateValue)) {
+                    show = false;
+                }
+            }
+            
+            report.style.display = show ? 'block' : 'none';
+        });
     }
-}
-
-// Open template manager
-function openTemplateManager() {
-    window.location.href = '/reports/templates/';
-}
-
-// Show error message
-function showError(message) {
-    // Implement error display
-    console.error(message);
-}
+    
+    statusFilter.addEventListener('change', applyFilters);
+    clientFilter.addEventListener('change', applyFilters);
+    dateFilter.addEventListener('change', applyFilters);
+    searchFilter.addEventListener('input', applyFilters);
+});
 </script>
 {% endblock %}

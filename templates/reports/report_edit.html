@@ -1,0 +1,418 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - SmartLeakPro{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<style>
+    .form-section {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #007bff;
+    }
+    .form-section h5 {
+        color: #007bff;
+        margin-bottom: 1rem;
+    }
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+    .form-floating {
+        margin-bottom: 1rem;
+    }
+    .btn-group-custom {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .section-editor {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+    .section-header {
+        background: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        padding: 1rem;
+        font-weight: 600;
+        display: flex;
+        justify-content: between;
+        align-items: center;
+    }
+    .section-body {
+        padding: 1.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-edit text-primary me-2"></i>
+                        {{ page_title }}
+                    </h1>
+                    <p class="text-muted mb-0">Modifiez les informations du rapport</p>
+                </div>
+                <div>
+                    <a href="{% url 'reports:report_detail' report.id %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-eye me-2"></i>Voir le rapport
+                    </a>
+                    <a href="{% url 'reports:report_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <div class="row">
+        <div class="col-lg-8">
+            <form method="post" id="reportForm">
+                {% csrf_token %}
+                
+                <!-- Basic Information -->
+                <div class="form-section">
+                    <h5><i class="fas fa-info-circle me-2"></i>Informations Générales</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="title" name="title" 
+                                       value="{{ report.title }}" placeholder="Titre du rapport" required>
+                                <label for="title" class="required-field">Titre du rapport</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="status" name="status" required>
+                                    <option value="draft" {% if report.status == 'draft' %}selected{% endif %}>Brouillon</option>
+                                    <option value="in_progress" {% if report.status == 'in_progress' %}selected{% endif %}>En cours</option>
+                                    <option value="completed" {% if report.status == 'completed' %}selected{% endif %}>Terminé</option>
+                                    <option value="pending_review" {% if report.status == 'pending_review' %}selected{% endif %}>En attente</option>
+                                    <option value="approved" {% if report.status == 'approved' %}selected{% endif %}>Approuvé</option>
+                                    <option value="rejected" {% if report.status == 'rejected' %}selected{% endif %}>Rejeté</option>
+                                </select>
+                                <label for="status" class="required-field">Statut</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="client" name="client" required>
+                                    <option value="">Sélectionner un client</option>
+                                    <option value="Client ABC" {% if report.client == 'Client ABC' %}selected{% endif %}>Client ABC</option>
+                                    <option value="Client XYZ" {% if report.client == 'Client XYZ' %}selected{% endif %}>Client XYZ</option>
+                                    <option value="Client DEF" {% if report.client == 'Client DEF' %}selected{% endif %}>Client DEF</option>
+                                </select>
+                                <label for="client" class="required-field">Client</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="site" name="site" required>
+                                    <option value="">Sélectionner un site</option>
+                                    <option value="Site Principal" {% if report.site == 'Site Principal' %}selected{% endif %}>Site Principal</option>
+                                    <option value="Site Secondaire" {% if report.site == 'Site Secondaire' %}selected{% endif %}>Site Secondaire</option>
+                                    <option value="Site Industriel" {% if report.site == 'Site Industriel' %}selected{% endif %}>Site Industriel</option>
+                                </select>
+                                <label for="site" class="required-field">Site</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-floating">
+                        <textarea class="form-control" id="description" name="description" 
+                                  placeholder="Description" style="height: 100px">{{ report.description }}</textarea>
+                        <label for="description">Description</label>
+                    </div>
+                </div>
+
+                <!-- Report Sections -->
+                <div class="form-section">
+                    <h5><i class="fas fa-list me-2"></i>Contenu du Rapport</h5>
+                    <div id="sections-container">
+                        <!-- Section 1 -->
+                        <div class="section-editor">
+                            <div class="section-header">
+                                <span>Informations générales</span>
+                                <div>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeSection(this)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="section-body">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="section1_title" name="section1_title" 
+                                           value="Informations générales" placeholder="Titre de la section">
+                                    <label for="section1_title">Titre de la section</label>
+                                </div>
+                                <div class="form-floating">
+                                    <textarea class="form-control" id="section1_content" name="section1_content" 
+                                              placeholder="Contenu de la section" style="height: 100px">Inspection de routine</textarea>
+                                    <label for="section1_content">Contenu de la section</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 2 -->
+                        <div class="section-editor">
+                            <div class="section-header">
+                                <span>État des équipements</span>
+                                <div>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeSection(this)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="section-body">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="section2_title" name="section2_title" 
+                                           value="État des équipements" placeholder="Titre de la section">
+                                    <label for="section2_title">Titre de la section</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="section2_check1" name="section2_check1" checked>
+                                    <label class="form-check-label" for="section2_check1">
+                                        Tous les équipements fonctionnent correctement
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="section2_check2" name="section2_check2">
+                                    <label class="form-check-label" for="section2_check2">
+                                        Maintenance préventive effectuée
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="section2_check3" name="section2_check3">
+                                    <label class="form-check-label" for="section2_check3">
+                                        Aucun problème détecté
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 3 -->
+                        <div class="section-editor">
+                            <div class="section-header">
+                                <span>Photos</span>
+                                <div>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeSection(this)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="section-body">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="section3_title" name="section3_title" 
+                                           value="Photos" placeholder="Titre de la section">
+                                    <label for="section3_title">Titre de la section</label>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="photos" class="form-label">Photos</label>
+                                    <input type="file" class="form-control" id="photos" name="photos" multiple accept="image/*">
+                                    <div class="form-text">Sélectionnez une ou plusieurs photos</div>
+                                </div>
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    3 photos ajoutées précédemment
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 4 -->
+                        <div class="section-editor">
+                            <div class="section-header">
+                                <span>Recommandations</span>
+                                <div>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeSection(this)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="section-body">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="section4_title" name="section4_title" 
+                                           value="Recommandations" placeholder="Titre de la section">
+                                    <label for="section4_title">Titre de la section</label>
+                                </div>
+                                <div class="form-floating">
+                                    <textarea class="form-control" id="section4_content" name="section4_content" 
+                                              placeholder="Contenu de la section" style="height: 100px">Aucune action corrective nécessaire</textarea>
+                                    <label for="section4_content">Contenu de la section</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <button type="button" class="btn btn-outline-primary" onclick="addSection()">
+                            <i class="fas fa-plus me-2"></i>Ajouter une section
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="form-section">
+                    <h5><i class="fas fa-cogs me-2"></i>Actions</h5>
+                    <div class="btn-group-custom">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Sauvegarder les modifications
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="saveDraft()">
+                            <i class="fas fa-file-alt me-2"></i>Sauvegarder comme Brouillon
+                        </button>
+                        <button type="button" class="btn btn-outline-warning" onclick="previewReport()">
+                            <i class="fas fa-eye me-2"></i>Aperçu
+                        </button>
+                        <a href="{% url 'reports:report_detail' report.id %}" class="btn btn-outline-danger">
+                            <i class="fas fa-times me-2"></i>Annuler
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Informations
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <strong>Conseil:</strong> Modifiez les sections selon vos besoins.
+                    </div>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Note:</strong> Les modifications seront sauvegardées automatiquement.
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-history me-2"></i>Historique des modifications
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item px-0">
+                            <div class="d-flex justify-content-between">
+                                <small>Rapport créé</small>
+                                <small class="text-muted">Aujourd'hui</small>
+                            </div>
+                        </div>
+                        <div class="list-group-item px-0">
+                            <div class="d-flex justify-content-between">
+                                <small>Section ajoutée</small>
+                                <small class="text-muted">Il y a 1 heure</small>
+                            </div>
+                        </div>
+                        <div class="list-group-item px-0">
+                            <div class="d-flex justify-content-between">
+                                <small>Statut modifié</small>
+                                <small class="text-muted">Il y a 2 heures</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let sectionCount = 4;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation
+    const form = document.getElementById('reportForm');
+    form.addEventListener('submit', function(e) {
+        const requiredFields = form.querySelectorAll('[required]');
+        let isValid = true;
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            alert('Veuillez remplir tous les champs obligatoires.');
+        }
+    });
+    
+    // Remove invalid class on input
+    const inputs = form.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('input', function() {
+            this.classList.remove('is-invalid');
+        });
+    });
+});
+
+function addSection() {
+    sectionCount++;
+    const container = document.getElementById('sections-container');
+    const newSection = document.createElement('div');
+    newSection.className = 'section-editor';
+    newSection.innerHTML = `
+        <div class="section-header">
+            <span>Nouvelle section</span>
+            <div>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeSection(this)">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+        <div class="section-body">
+            <div class="form-floating">
+                <input type="text" class="form-control" id="section${sectionCount}_title" name="section${sectionCount}_title" 
+                       value="Nouvelle section" placeholder="Titre de la section">
+                <label for="section${sectionCount}_title">Titre de la section</label>
+            </div>
+            <div class="form-floating">
+                <textarea class="form-control" id="section${sectionCount}_content" name="section${sectionCount}_content" 
+                          placeholder="Contenu de la section" style="height: 100px"></textarea>
+                <label for="section${sectionCount}_content">Contenu de la section</label>
+            </div>
+        </div>
+    `;
+    container.appendChild(newSection);
+}
+
+function removeSection(button) {
+    if (confirm('Voulez-vous supprimer cette section ?')) {
+        button.closest('.section-editor').remove();
+    }
+}
+
+function saveDraft() {
+    alert('Fonctionnalité de sauvegarde en brouillon à implémenter.');
+}
+
+function previewReport() {
+    alert('Fonctionnalité d\'aperçu à implémenter.');
+}
+</script>
+{% endblock %}
