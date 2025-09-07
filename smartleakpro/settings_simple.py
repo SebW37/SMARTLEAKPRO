@@ -13,7 +13,7 @@ SECRET_KEY = 'django-insecure-change-me-in-production'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'smartleakpro.com', 'www.smartleakpro.com', '72.60.44.57']
 
 # Application definition
 INSTALLED_APPS = [
