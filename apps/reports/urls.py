@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from . import views, views_django
+from . import views, views_django, views_simple
 
 router = DefaultRouter()
 router.register(r'templates', views.ReportTemplateViewSet, basename='report-template')
@@ -15,12 +15,15 @@ urlpatterns = [
     # API endpoints
     path('api/', include(router.urls)),
     
-    # Django views
-    path('', views_django.report_list, name='report_list'),
-    path('create/', views_django.report_create, name='report_create'),
-    path('<uuid:report_id>/', views_django.report_detail, name='report_detail'),
-    path('<uuid:report_id>/edit/', views_django.report_edit, name='report_edit'),
-    path('<uuid:report_id>/preview/', views_django.report_preview, name='report_preview'),
-    path('templates/', views_django.template_list, name='template_list'),
-    path('templates/<uuid:template_id>/', views_django.template_detail, name='template_detail'),
+    # Simple test view
+    path('', views_simple.report_list_simple, name='report_list'),
+    
+    # Django views (commented out until migrations are ready)
+    # path('', views_django.report_list, name='report_list'),
+    # path('create/', views_django.report_create, name='report_create'),
+    # path('<uuid:report_id>/', views_django.report_detail, name='report_detail'),
+    # path('<uuid:report_id>/edit/', views_django.report_edit, name='report_edit'),
+    # path('<uuid:report_id>/preview/', views_django.report_preview, name='report_preview'),
+    # path('templates/', views_django.template_list, name='template_list'),
+    # path('templates/<uuid:template_id>/', views_django.template_detail, name='template_detail'),
 ]
