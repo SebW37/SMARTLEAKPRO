@@ -38,4 +38,6 @@ urlpatterns = [
     path('', home, name='home'),
     path('clients/', include('clients.urls')),
     path('interventions/', include('interventions.urls')),
+    path('reports/', include('apps.reports.urls')),
+    path('api/', include('apps.reports.urls')),
 ]

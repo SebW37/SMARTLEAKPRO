@@ -21,3 +21,6 @@ django-crispy-forms==2.1
 crispy-bootstrap5==0.7
 requests==2.31.0
 drf-yasg==1.21.7
+python-docx==0.8.11
+weasyprint==60.2
+django-jsonfield==1.4.0
