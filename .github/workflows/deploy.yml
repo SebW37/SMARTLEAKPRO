@@ -1,0 +1,20 @@
+name: Deploy SmartLeakPro to Hostinger
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Deploy to Hostinger
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HOSTINGER_HOST }}
+        username: ${{ secrets.HOSTINGER_USERNAME }}
+        key: ${{ secrets.HOSTINGER_SSH_KEY }}
+        script: |
+          cd /home/SMARTLEAKPRO
+          ./deploy_simple.sh
