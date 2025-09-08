@@ -1,11 +1,20 @@
 """
 Celery tasks for notifications.
 """
-from celery import shared_task
 from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings
 from .models import Notification, NotificationLog
+
+# Optional Celery import
+try:
+    from celery import shared_task
+    CELERY_AVAILABLE = True
+except ImportError:
+    CELERY_AVAILABLE = False
+    # Fallback decorator that does nothing
+    def shared_task(func):
+        return func
 
 
 @shared_task

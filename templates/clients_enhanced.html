@@ -301,6 +301,33 @@
     </div>
 </div>
 
+<!-- Quick Actions Modal -->
+<div class="modal fade" id="quickActionsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Actions rapides</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary" onclick="viewClientDetails()">
+                        <i class="fas fa-eye"></i> Voir les détails
+                    </button>
+                    <button class="btn btn-outline-warning" onclick="editClient()">
+                        <i class="fas fa-edit"></i> Modifier
+                    </button>
+                    <button class="btn btn-outline-info" onclick="viewContacts()">
+                        <i class="fas fa-address-book"></i> Voir les contacts
+                    </button>
+                    <button class="btn btn-outline-success" onclick="viewContracts()">
+                        <i class="fas fa-file-contract"></i> Voir les contrats
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
