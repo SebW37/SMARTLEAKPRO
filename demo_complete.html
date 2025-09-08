@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartLeakPro - Démo Complète</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { 
+            background-color: #f8f9fa; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .card { 
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: none;
+            border-radius: 10px;
+        }
+        .btn-primary { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            border: none;
+            border-radius: 8px;
+        }
+        .btn-primary:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        .stats-card { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: white;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        .table-hover tbody tr:hover {
+            background-color: rgba(102, 126, 234, 0.1);
+        }
+        .badge {
+            font-size: 0.8em;
+        }
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .status-actif { background-color: #28a745; }
+        .status-inactif { background-color: #6c757d; }
+        .status-planifie { background-color: #007bff; }
+        .status-en_cours { background-color: #ffc107; }
+        .status-valide { background-color: #28a745; }
+        .status-archive { background-color: #6c757d; }
+        .demo-notice {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-tint me-2"></i>SmartLeakPro
+                <small class="ms-2">v1.0.0 - Démo</small>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#dashboard" onclick="showSection('dashboard')">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#clients" onclick="showSection('clients')">
+                            <i class="fas fa-users me-1"></i>Clients
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#interventions" onclick="showSection('interventions')">
+                            <i class="fas fa-tools me-1"></i>Interventions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#stats" onclick="showSection('stats')">
+                            <i class="fas fa-chart-bar me-1"></i>Statistiques
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenu principal -->
+    <div class="container mt-4">
+        <!-- Notice de démo -->
+        <div class="demo-notice">
+            <h5><i class="fas fa-info-circle me-2"></i>Mode Démonstration</h5>
+            <p class="mb-0">Cette version fonctionne avec des données simulées. Toutes les fonctionnalités sont opérationnelles pour la démonstration.</p>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard-section" class="section">
+            <h1 class="mb-4">
+                <i class="fas fa-tachometer-alt me-2"></i>Dashboard SmartLeakPro
+            </h1>
+            
+            <!-- Statistiques -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card stats-card text-center p-3">
+                        <i class="fas fa-users fa-2x mb-2"></i>
+                        <h3 id="clients-count">0</h3>
+                        <p class="mb-0">Clients</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stats-card text-center p-3">
+                        <i class="fas fa-tools fa-2x mb-2"></i>
+                        <h3 id="interventions-count">0</h3>
+                        <p class="mb-0">Interventions</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stats-card text-center p-3">
+                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                        <h3 id="completed-count">0</h3>
+                        <p class="mb-0">Terminées</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card stats-card text-center p-3">
+                        <i class="fas fa-clock fa-2x mb-2"></i>
+                        <h3 id="pending-count">0</h3>
+                        <p class="mb-0">En cours</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions rapides -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-bolt me-2"></i>Actions rapides</h5>
+                        </div>
+                        <div class="card-body">
+                            <button class="btn btn-primary me-2" onclick="initDemoData()">
+                                <i class="fas fa-database me-1"></i>Initialiser les données de démo
+                            </button>
+                            <button class="btn btn-success me-2" onclick="showAddClientModal()">
+                                <i class="fas fa-user-plus me-1"></i>Ajouter un client
+                            </button>
+                            <button class="btn btn-warning me-2" onclick="showAddInterventionModal()">
+                                <i class="fas fa-plus me-1"></i>Nouvelle intervention
+                            </button>
+                            <button class="btn btn-info me-2" onclick="refreshData()">
+                                <i class="fas fa-sync me-1"></i>Actualiser
+                            </button>
+                            <button class="btn btn-secondary" onclick="resetData()">
+                                <i class="fas fa-trash me-1"></i>Reset données
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Résumé des données -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-users me-2"></i>Clients récents</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="clients-summary">
+                                <p class="text-muted">Aucun client pour le moment</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-tools me-2"></i>Interventions récentes</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="interventions-summary">
+                                <p class="text-muted">Aucune intervention pour le moment</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Clients -->
+        <div id="clients-section" class="section" style="display: none;">
+            <h1 class="mb-4">
+                <i class="fas fa-users me-2"></i>Gestion des Clients
+            </h1>
+            
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5>Liste des clients</h5>
+                    <button class="btn btn-primary" onclick="showAddClientModal()">
+                        <i class="fas fa-plus me-1"></i>Nouveau client
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nom</th>
+                                    <th>Email</th>
+                                    <th>Téléphone</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="clients-table">
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">Aucun client</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Interventions -->
+        <div id="interventions-section" class="section" style="display: none;">
+            <h1 class="mb-4">
+                <i class="fas fa-tools me-2"></i>Gestion des Interventions
+            </h1>
+            
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5>Liste des interventions</h5>
+                    <button class="btn btn-primary" onclick="showAddInterventionModal()">
+                        <i class="fas fa-plus me-1"></i>Nouvelle intervention
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Client</th>
+                                    <th>Lieu</th>
+                                    <th>Statut</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="interventions-table">
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">Aucune intervention</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section Statistiques -->
+        <div id="stats-section" class="section" style="display: none;">
+            <h1 class="mb-4">
+                <i class="fas fa-chart-bar me-2"></i>Statistiques
+            </h1>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Statistiques générales</h5>
+                        </div>
+                        <div class="card-body" id="general-stats">
+                            <p class="text-muted">Chargement...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Types d'interventions</h5>
+                        </div>
+                        <div class="card-body" id="intervention-types">
+                            <p class="text-muted">Chargement...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour ajouter un client -->
+    <div class="modal fade" id="clientModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nouveau Client</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="clientForm">
+                        <div class="mb-3">
+                            <label class="form-label">Nom *</label>
+                            <input type="text" class="form-control" id="clientName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email *</label>
+                            <input type="email" class="form-control" id="clientEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Téléphone *</label>
+                            <input type="tel" class="form-control" id="clientPhone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Adresse *</label>
+                            <textarea class="form-control" id="clientAddress" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Statut</label>
+                            <select class="form-select" id="clientStatus">
+                                <option value="actif">Actif</option>
+                                <option value="inactif">Inactif</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" onclick="saveClient()">
+                        <i class="fas fa-save me-1"></i>Enregistrer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour ajouter une intervention -->
+    <div class="modal fade" id="interventionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nouvelle Intervention</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="interventionForm">
+                        <div class="mb-3">
+                            <label class="form-label">Client *</label>
+                            <select class="form-select" id="interventionClient" required>
+                                <option value="">Sélectionner un client</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Type d'intervention *</label>
+                            <select class="form-select" id="interventionType" required>
+                                <option value="inspection">Inspection</option>
+                                <option value="detection">Détection</option>
+                                <option value="reparation">Réparation</option>
+                                <option value="maintenance">Maintenance</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Statut *</label>
+                            <select class="form-select" id="interventionStatus" required>
+                                <option value="planifie">Planifié</option>
+                                <option value="en_cours">En cours</option>
+                                <option value="valide">Validé</option>
+                                <option value="archive">Archivé</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Lieu *</label>
+                            <input type="text" class="form-control" id="interventionLieu" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description *</label>
+                            <textarea class="form-control" id="interventionDescription" rows="3" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" onclick="saveIntervention()">
+                        <i class="fas fa-save me-1"></i>Enregistrer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Données en mémoire pour la démo
+        let clients = [];
+        let interventions = [];
+        let currentSection = 'dashboard';
+
+        // Fonctions de gestion des données
+        function initDemoData() {
+            clients = [
+                {
+                    id: generateId(),
+                    nom: "Client Démo 1",
+                    email: "client1@demo.com",
+                    telephone: "0123456789",
+                    adresse: "123 Rue Démo, 75001 Paris",
+                    statut: "actif",
+                    date_creation: new Date().toISOString()
+                },
+                {
+                    id: generateId(),
+                    nom: "Client Démo 2",
+                    email: "client2@demo.com",
+                    telephone: "0987654321",
+                    adresse: "456 Avenue Test, 69000 Lyon",
+                    statut: "actif",
+                    date_creation: new Date().toISOString()
+                },
+                {
+                    id: generateId(),
+                    nom: "Client Démo 3",
+                    email: "client3@demo.com",
+                    telephone: "0555666777",
+                    adresse: "789 Boulevard Exemple, 13000 Marseille",
+                    statut: "inactif",
+                    date_creation: new Date().toISOString()
+                }
+            ];
+
+            interventions = [
+                {
+                    id: generateId(),
+                    client_id: clients[0].id,
+                    date_intervention: new Date().toISOString(),
+                    type_intervention: "inspection",
+                    statut: "planifie",
+                    lieu: "123 Rue Démo, 75001 Paris",
+                    description: "Inspection de routine - Vérification des canalisations",
+                    date_creation: new Date().toISOString()
+                },
+                {
+                    id: generateId(),
+                    client_id: clients[1].id,
+                    date_intervention: new Date().toISOString(),
+                    type_intervention: "detection",
+                    statut: "en_cours",
+                    lieu: "456 Avenue Test, 69000 Lyon",
+                    description: "Détection de fuite urgente - Réparation en cours",
+                    date_creation: new Date().toISOString()
+                },
+                {
+                    id: generateId(),
+                    client_id: clients[0].id,
+                    date_intervention: new Date().toISOString(),
+                    type_intervention: "reparation",
+                    statut: "valide",
+                    lieu: "123 Rue Démo, 75001 Paris",
+                    description: "Réparation terminée - Fuite colmatée",
+                    date_creation: new Date().toISOString()
+                }
+            ];
+
+            showAlert('Données de démonstration initialisées avec succès!', 'success');
+            refreshData();
+        }
+
+        function resetData() {
+            if (confirm('Êtes-vous sûr de vouloir réinitialiser toutes les données ?')) {
+                clients = [];
+                interventions = [];
+                showAlert('Données réinitialisées', 'info');
+                refreshData();
+            }
+        }
+
+        function generateId() {
+            return 'id_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Fonctions d'affichage
+        function updateStats() {
+            document.getElementById('clients-count').textContent = clients.length;
+            document.getElementById('interventions-count').textContent = interventions.length;
+            document.getElementById('completed-count').textContent = 
+                interventions.filter(i => i.statut === 'valide').length;
+            document.getElementById('pending-count').textContent = 
+                interventions.filter(i => i.statut === 'en_cours').length;
+        }
+
+        function displayClientsSummary() {
+            const container = document.getElementById('clients-summary');
+            if (clients.length === 0) {
+                container.innerHTML = '<p class="text-muted">Aucun client pour le moment</p>';
+                return;
+            }
+
+            container.innerHTML = clients.slice(0, 5).map(client => `
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                        <strong>${client.nom}</strong><br>
+                        <small class="text-muted">${client.email}</small>
+                    </div>
+                    <span class="badge bg-${client.statut === 'actif' ? 'success' : 'secondary'}">
+                        <span class="status-indicator status-${client.statut}"></span>
+                        ${client.statut}
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        function displayInterventionsSummary() {
+            const container = document.getElementById('interventions-summary');
+            if (interventions.length === 0) {
+                container.innerHTML = '<p class="text-muted">Aucune intervention pour le moment</p>';
+                return;
+            }
+
+            container.innerHTML = interventions.slice(0, 5).map(intervention => {
+                const client = clients.find(c => c.id === intervention.client_id);
+                return `
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <strong>${intervention.type_intervention}</strong><br>
+                            <small class="text-muted">${client ? client.nom : 'Client inconnu'} - ${intervention.lieu}</small>
+                        </div>
+                        <span class="badge bg-${getStatusColor(intervention.statut)}">
+                            <span class="status-indicator status-${intervention.statut}"></span>
+                            ${intervention.statut}
+                        </span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function displayClientsTable() {
+            const tbody = document.getElementById('clients-table');
+            if (clients.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Aucun client</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = clients.map(client => `
+                <tr>
+                    <td>${client.nom}</td>
+                    <td>${client.email}</td>
+                    <td>${client.telephone}</td>
+                    <td>
+                        <span class="badge bg-${client.statut === 'actif' ? 'success' : 'secondary'}">
+                            <span class="status-indicator status-${client.statut}"></span>
+                            ${client.statut}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="editClient('${client.id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteClient('${client.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function displayInterventionsTable() {
+            const tbody = document.getElementById('interventions-table');
+            if (interventions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Aucune intervention</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = interventions.map(intervention => {
+                const client = clients.find(c => c.id === intervention.client_id);
+                return `
+                    <tr>
+                        <td>${intervention.type_intervention}</td>
+                        <td>${client ? client.nom : 'Client inconnu'}</td>
+                        <td>${intervention.lieu}</td>
+                        <td>
+                            <span class="badge bg-${getStatusColor(intervention.statut)}">
+                                <span class="status-indicator status-${intervention.statut}"></span>
+                                ${intervention.statut}
+                            </span>
+                        </td>
+                        <td>${new Date(intervention.date_intervention).toLocaleDateString()}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" onclick="editIntervention('${intervention.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteIntervention('${intervention.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function displayStats() {
+            const clientsActifs = clients.filter(c => c.statut === 'actif').length;
+            const clientsInactifs = clients.filter(c => c.statut === 'inactif').length;
+            const interventionsPlanifiees = interventions.filter(i => i.statut === 'planifie').length;
+            const interventionsEnCours = interventions.filter(i => i.statut === 'en_cours').length;
+            const interventionsValidees = interventions.filter(i => i.statut === 'valide').length;
+            
+            const typesIntervention = {};
+            interventions.forEach(i => {
+                typesIntervention[i.type_intervention] = (typesIntervention[i.type_intervention] || 0) + 1;
+            });
+
+            document.getElementById('general-stats').innerHTML = `
+                <h6>Clients</h6>
+                <p>Total: <strong>${clients.length}</strong></p>
+                <p>Actifs: <span class="text-success">${clientsActifs}</span></p>
+                <p>Inactifs: <span class="text-muted">${clientsInactifs}</span></p>
+                
+                <h6 class="mt-3">Interventions</h6>
+                <p>Total: <strong>${interventions.length}</strong></p>
+                <p>Planifiées: <span class="text-primary">${interventionsPlanifiees}</span></p>
+                <p>En cours: <span class="text-warning">${interventionsEnCours}</span></p>
+                <p>Validées: <span class="text-success">${interventionsValidees}</span></p>
+            `;
+
+            document.getElementById('intervention-types').innerHTML = `
+                <h6>Types d'interventions</h6>
+                ${Object.entries(typesIntervention).map(([type, count]) => 
+                    `<p>${type}: <strong>${count}</strong></p>`
+                ).join('')}
+            `;
+        }
+
+        function getStatusColor(status) {
+            const colors = {
+                'actif': 'success',
+                'inactif': 'secondary',
+                'planifie': 'primary',
+                'en_cours': 'warning',
+                'valide': 'success',
+                'archive': 'secondary'
+            };
+            return colors[status] || 'secondary';
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.top = '20px';
+            alertDiv.style.right = '20px';
+            alertDiv.style.zIndex = '9999';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            setTimeout(() => alertDiv.remove(), 5000);
+        }
+
+        function showSection(sectionName) {
+            // Masquer toutes les sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Afficher la section demandée
+            document.getElementById(sectionName + '-section').style.display = 'block';
+            
+            // Mettre à jour la navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            currentSection = sectionName;
+            
+            // Charger les données spécifiques à la section
+            if (sectionName === 'stats') {
+                displayStats();
+            }
+        }
+
+        // Fonctions d'interface
+        function showAddClientModal() {
+            document.getElementById('clientForm').reset();
+            new bootstrap.Modal(document.getElementById('clientModal')).show();
+        }
+
+        function showAddInterventionModal() {
+            if (clients.length === 0) {
+                showAlert('Veuillez d\'abord ajouter un client', 'warning');
+                return;
+            }
+            
+            // Remplir la liste des clients
+            const select = document.getElementById('interventionClient');
+            select.innerHTML = '<option value="">Sélectionner un client</option>';
+            clients.forEach(client => {
+                select.innerHTML += `<option value="${client.id}">${client.nom}</option>`;
+            });
+            
+            document.getElementById('interventionForm').reset();
+            new bootstrap.Modal(document.getElementById('interventionModal')).show();
+        }
+
+        function saveClient() {
+            const client = {
+                id: generateId(),
+                nom: document.getElementById('clientName').value,
+                email: document.getElementById('clientEmail').value,
+                telephone: document.getElementById('clientPhone').value,
+                adresse: document.getElementById('clientAddress').value,
+                statut: document.getElementById('clientStatus').value,
+                date_creation: new Date().toISOString()
+            };
+
+            clients.push(client);
+            showAlert('Client ajouté avec succès!', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('clientModal')).hide();
+            refreshData();
+        }
+
+        function saveIntervention() {
+            const intervention = {
+                id: generateId(),
+                client_id: document.getElementById('interventionClient').value,
+                date_intervention: new Date().toISOString(),
+                type_intervention: document.getElementById('interventionType').value,
+                statut: document.getElementById('interventionStatus').value,
+                lieu: document.getElementById('interventionLieu').value,
+                description: document.getElementById('interventionDescription').value,
+                date_creation: new Date().toISOString()
+            };
+
+            interventions.push(intervention);
+            showAlert('Intervention ajoutée avec succès!', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('interventionModal')).hide();
+            refreshData();
+        }
+
+        function refreshData() {
+            updateStats();
+            displayClientsSummary();
+            displayInterventionsSummary();
+            displayClientsTable();
+            displayInterventionsTable();
+            
+            if (currentSection === 'stats') {
+                displayStats();
+            }
+        }
+
+        // Fonctions de suppression et édition
+        function editClient(clientId) {
+            const client = clients.find(c => c.id === clientId);
+            if (client) {
+                showAlert(`Édition du client: ${client.nom}`, 'info');
+                // Ici on pourrait ouvrir un modal d'édition
+            }
+        }
+
+        function deleteClient(clientId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce client ?')) {
+                clients = clients.filter(c => c.id !== clientId);
+                interventions = interventions.filter(i => i.client_id !== clientId);
+                showAlert('Client supprimé avec succès', 'success');
+                refreshData();
+            }
+        }
+
+        function editIntervention(interventionId) {
+            const intervention = interventions.find(i => i.id === interventionId);
+            if (intervention) {
+                showAlert(`Édition de l'intervention: ${intervention.type_intervention}`, 'info');
+                // Ici on pourrait ouvrir un modal d'édition
+            }
+        }
+
+        function deleteIntervention(interventionId) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer cette intervention ?')) {
+                interventions = interventions.filter(i => i.id !== interventionId);
+                showAlert('Intervention supprimée avec succès', 'success');
+                refreshData();
+            }
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            refreshData();
+        });
+    </script>
+</body>
+</html>
