@@ -30,7 +30,7 @@ class InterventionDocumentSerializer(serializers.ModelSerializer):
         model = InterventionDocument
         fields = [
             'id', 'intervention', 'task', 'title', 'document_type', 'file',
-            'file_url', 'description', 'location', 'uploaded_by_name', 'uploaded_at'
+            'file_url', 'description', 'uploaded_by_name', 'uploaded_at'
         ]
         read_only_fields = ['id', 'uploaded_at']
     
@@ -73,7 +73,7 @@ class InterventionSerializer(serializers.ModelSerializer):
             'client', 'site', 'client_name', 'site_name', 'scheduled_date',
             'estimated_duration', 'actual_start_date', 'actual_end_date',
             'assigned_technician', 'assigned_technician_name', 'created_by',
-            'created_by_name', 'location', 'address', 'notes', 'materials_needed',
+            'created_by_name', 'address', 'notes', 'materials_needed',
             'special_instructions', 'is_overdue', 'duration', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']

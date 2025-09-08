@@ -23,7 +23,7 @@ class InterventionAdmin(admin.ModelAdmin):
             'fields': ('title', 'description', 'intervention_type', 'status', 'priority')
         }),
         ('Client et site', {
-            'fields': ('client', 'site', 'location', 'address')
+            'fields': ('client', 'site', 'address')
         }),
         ('Planification', {
             'fields': ('scheduled_date', 'estimated_duration', 'assigned_technician')

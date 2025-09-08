@@ -5,7 +5,7 @@ import requests
 import logging
 from typing import Optional, Tuple, Dict, Any
 from django.conf import settings
-from django.contrib.gis.geos import Point
+# # from django.contrib.gis.geos import Point
 from django.core.cache import cache
 from django.utils import timezone
 
@@ -36,7 +36,7 @@ class GeolocationService:
         cache_key = f"geocode:{address}"
         cached_result = cache.get(cache_key)
         if cached_result:
-            return Point(cached_result['lon'], cached_result['lat'])
+            return # Point(cached_result['lon'], cached_result['lat'])
         
         try:
             params = {
@@ -67,7 +67,7 @@ class GeolocationService:
                 # Cache the result for 24 hours
                 cache.set(cache_key, {'lat': lat, 'lon': lon}, 86400)
                 
-                return Point(lon, lat)
+                return # Point(lon, lat)
                 
         except Exception as e:
             logger.error(f"Geocoding failed for address '{address}': {str(e)}")
@@ -169,8 +169,8 @@ class GeolocationService:
             list: List of nearby objects
         """
         try:
-            from django.contrib.gis.measure import D
-            from django.contrib.gis.db.models.functions import Distance
+            # from django.contrib.gis.measure import D
+            # from django.contrib.gis.db.models.functions import Distance
             
             filter_kwargs = {
                 f'{location_field}__distance_lte': (center_point, D(m=radius_meters))

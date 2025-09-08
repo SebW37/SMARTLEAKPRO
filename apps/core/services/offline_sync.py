@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from django.core.cache import cache
 from django.db import transaction
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.gis.geos import Point
+# # from django.contrib.gis.geos import Point
 
 logger = logging.getLogger(__name__)
 
@@ -251,7 +251,7 @@ class OfflineSyncService:
                 lat = data['location'].get('latitude')
                 lng = data['location'].get('longitude')
                 if lat and lng:
-                    data['location'] = Point(lng, lat)
+                    data['location'] = # Point(lng, lat)
             
             obj = model_class.objects.create(**data)
             return True
@@ -279,7 +279,7 @@ class OfflineSyncService:
                 lat = data['location'].get('latitude')
                 lng = data['location'].get('longitude')
                 if lat and lng:
-                    data['location'] = Point(lng, lat)
+                    data['location'] = # Point(lng, lat)
             
             # Update object
             for field, value in data.items():
@@ -429,7 +429,7 @@ class OfflineDataManager:
     
     def _get_user_data(self, user_id: int, data_type: str) -> List[Dict[str, Any]]:
         """Get user-specific data for a data type."""
-        from apps.core.models import User
+        from django.contrib.auth.models import User
         
         try:
             user = User.objects.get(id=user_id)

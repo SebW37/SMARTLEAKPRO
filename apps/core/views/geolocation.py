@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django.contrib.gis.geos import Point
+# # from django.contrib.gis.geos import Point
 from apps.core.services.geolocation import geolocation_service, location_tracker
 import logging
 
@@ -149,8 +149,8 @@ def calculate_distance(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        point1 = Point(lng1, lat1)
-        point2 = Point(lng2, lat2)
+        point1 = # Point(lng1, lat1)
+        point2 = # Point(lng2, lat2)
         
         distance_meters = geolocation_service.calculate_distance(point1, point2)
         
@@ -207,7 +207,7 @@ def find_nearby(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        center_point = Point(longitude, latitude)
+        center_point = # Point(longitude, latitude)
         
         # Get model class based on type
         if location_type == 'clients':

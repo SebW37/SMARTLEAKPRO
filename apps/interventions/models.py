@@ -2,7 +2,7 @@
 Intervention models for SmartLeakPro application.
 """
 from django.db import models
-# from django.contrib.gis.db import models as gis_models
+# # # # from django.contrib.gis.db import models as gis_models
 from django.utils import timezone
 from django.contrib.auth.models import User
 from apps.clients.models import Client, ClientSite
@@ -169,9 +169,9 @@ class InterventionDocument(models.Model):
 
 
 class InterventionNote(models.Model):
-    """Note model for intervention comments and updates."""
+    intervention = models.ForeignKey(Intervention, on_delete=models.CASCADE, related_name='intervention_notes')
+    # ... rest of the fields    """Note model for intervention comments and updates."""
     
-    intervention = models.ForeignKey(Intervention, on_delete=models.CASCADE, related_name='notes')
     task = models.ForeignKey(InterventionTask, on_delete=models.CASCADE, related_name='notes', blank=True, null=True)
     
     title = models.CharField(max_length=200, verbose_name="Titre")

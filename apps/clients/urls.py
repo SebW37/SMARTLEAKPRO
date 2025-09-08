@@ -19,6 +19,10 @@ urlpatterns = [
     path('documents/<int:pk>/', views.ClientDocumentDetailView.as_view(), name='client-document-detail'),
     
     # Client notes
-    path('notes/', views.ClientNoteListCreateView.as_view(), name='client-note-list'),
-    path('notes/<int:pk>/', views.ClientNoteDetailView.as_view(), name='client-note-detail'),
+]
+
+# Web views
+from . import views_web
+urlpatterns += [
+    path('', views_web.client_list_view, name='client-list-web'),
 ]

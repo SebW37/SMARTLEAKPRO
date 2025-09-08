@@ -2,7 +2,7 @@
 Client models for SmartLeakPro application (SQLite version).
 """
 from django.db import models
-from apps.core.models import User
+from django.contrib.auth.models import User
 
 
 class Client(models.Model):

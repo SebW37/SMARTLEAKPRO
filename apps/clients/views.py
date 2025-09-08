@@ -6,10 +6,10 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
-# from django.contrib.gis.geos import Point
+# # # from django.contrib.gis.geos import Point
 from .models import Client, ClientSite, ClientDocument
 from .serializers import (
-    ClientSerializer, ClientSiteSerializer, ClientDocumentSerializer
+    ClientSerializer, ClientSiteSerializer, ClientDocumentSerializer,
 )
 
 
@@ -35,7 +35,7 @@ class ClientDetailView(generics.RetrieveUpdateDestroyAPIView):
     """Retrieve, update or delete a client."""
     
     queryset = Client.objects.all()
-    serializer_class = ClientDetailSerializer
+    serializer_class = ClientSerializer
     permission_classes = [permissions.IsAuthenticated]
 
 
@@ -84,11 +84,8 @@ class ClientDocumentDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
 
-class ClientNoteListCreateView(generics.ListCreateAPIView):
     """List and create client notes."""
     
-    queryset = ClientNote.objects.all()
-    serializer_class = ClientNoteSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['client', 'site', 'is_important']
@@ -100,11 +97,8 @@ class ClientNoteListCreateView(generics.ListCreateAPIView):
         serializer.save(created_by=self.request.user)
 
 
-class ClientNoteDetailView(generics.RetrieveUpdateDestroyAPIView):
     """Retrieve, update or delete a client note."""
     
-    queryset = ClientNote.objects.all()
-    serializer_class = ClientNoteSerializer
     permission_classes = [permissions.IsAuthenticated]
 
 
@@ -112,6 +106,7 @@ class ClientNoteDetailView(generics.RetrieveUpdateDestroyAPIView):
 @permission_classes([permissions.IsAuthenticated])
 def client_stats_view(request):
     """Get client statistics."""
+    from django.db import models
     stats = {
         'total_clients': Client.objects.count(),
         'active_clients': Client.objects.filter(is_active=True).count(),
@@ -122,3 +117,4 @@ def client_stats_view(request):
         )),
     }
     return Response(stats)
+

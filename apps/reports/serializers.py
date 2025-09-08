@@ -99,7 +99,7 @@ class ReportSignatureSerializer(serializers.ModelSerializer):
         return None
 
 
-class ReportExportSerializer(serializers.ModelSerializer):
+class ReportExportSerializerr(serializers.ModelSerializer):
     """Serializer for report exports"""
     exported_by_name = serializers.CharField(source='exported_by.get_full_name', read_only=True)
     download_url = serializers.SerializerMethodField()
@@ -141,7 +141,7 @@ class InterventionReportSerializer(serializers.ModelSerializer):
     template_name = serializers.CharField(source='template.name', read_only=True)
     section_data = ReportSectionDataSerializer(many=True, read_only=True)
     signatures = ReportSignatureSerializer(many=True, read_only=True)
-    exports = ReportExportSerializer(many=True, read_only=True)
+    exports = ReportExportSerializerr(many=True, read_only=True)
     history = ReportHistorySerializer(many=True, read_only=True)
     
     class Meta:
@@ -159,7 +159,7 @@ class InterventionReportSerializer(serializers.ModelSerializer):
         ]
 
 
-class ReportTemplateCreateSerializer(serializers.ModelSerializer):
+class ReportTemplateCreateSerializerr(serializers.ModelSerializer):
     """Serializer for creating report templates with sections"""
     sections = ReportSectionSerializer(many=True, required=False)
     

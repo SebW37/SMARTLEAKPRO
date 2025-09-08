@@ -7,6 +7,10 @@ class ClientSerializer(serializers.ModelSerializer):
         model = Client
         fields = '__all__'
 
+class ClientDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Client
+        fields = '__all__'
 
 class ClientSiteSerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,3 +22,4 @@ class ClientDocumentSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClientDocument
         fields = '__all__'
+
