@@ -1,0 +1,280 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* SmartLeakPro Custom Styles */
+:root {
+  --primary-color: #007bff;
+  --secondary-color: #6c757d;
+  --success-color: #28a745;
+  --danger-color: #dc3545;
+  --warning-color: #ffc107;
+  --info-color: #17a2b8;
+  --light-color: #f8f9fa;
+  --dark-color: #343a40;
+}
+
+.navbar-brand {
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+.card {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.btn {
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.table {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.table thead th {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  font-weight: 600;
+}
+
+.table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.badge {
+  font-size: 0.8em;
+  padding: 0.5em 0.75em;
+}
+
+.stats-card {
+  background: linear-gradient(135deg, var(--primary-color), #0056b3);
+  color: white;
+  border-radius: 15px;
+  padding: 2rem;
+  margin-bottom: 1rem;
+}
+
+.stats-card .stats-icon {
+  font-size: 3rem;
+  opacity: 0.8;
+}
+
+.stats-card .stats-number {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin: 0.5rem 0;
+}
+
+.stats-card .stats-label {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .stats-card {
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .stats-card .stats-icon {
+    font-size: 2rem;
+  }
+
+  .stats-card .stats-number {
+    font-size: 2rem;
+  }
+}
+
+/* Loading spinner */
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Form styles */
+.form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
+
+/* Modal styles */
+.modal-content {
+  border-radius: 10px;
+  border: none;
+}
+
+.modal-header {
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 10px 10px 0 0;
+}
+
+.modal-header .btn-close {
+  filter: invert(1);
+}
+
+/* Media styles */
+.media-card {
+  height: 100%;
+  transition: transform 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.media-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.media-thumbnail {
+  position: relative;
+  height: 150px;
+  overflow: hidden;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.media-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.media-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #6c757d;
+}
+
+.media-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.3) 100%);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.media-thumbnail:hover .media-overlay {
+  opacity: 1;
+}
+
+.media-type-badge {
+  font-size: 0.7rem;
+}
+
+.media-status-badge {
+  font-size: 0.7rem;
+}
+
+.media-info {
+  font-size: 0.9rem;
+}
+
+.media-name {
+  font-weight: 500;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.media-details {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.media-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.media-actions .btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+}
+
+/* Upload progress */
+.upload-progress {
+  margin-top: 10px;
+}
+
+/* Media grid responsive */
+@media (max-width: 768px) {
+  .media-thumbnail {
+    height: 120px;
+  }
+  
+  .media-actions {
+    flex-direction: column;
+  }
+  
+  .media-actions .btn {
+    width: 100%;
+    margin-bottom: 2px;
+  }
+}
+
+/* Media viewer */
+.media-viewer {
+  max-height: 70vh;
+  overflow: auto;
+}
+
+.media-viewer img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* GPS indicator */
+.gps-indicator {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0,0,0,0.7);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.7rem;
+}

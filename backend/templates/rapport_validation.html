@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapport de Validation - SmartLeakPro</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            line-height: 1.6;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #28a745;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #28a745;
+        }
+        .title {
+            font-size: 28px;
+            margin: 10px 0;
+            color: #2c3e50;
+        }
+        .subtitle {
+            font-size: 16px;
+            color: #7f8c8d;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2c3e50;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .info-table th,
+        .info-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        .info-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            width: 30%;
+        }
+        .validation-summary {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .validation-item {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #f8f9fa;
+        }
+        .validation-header {
+            font-weight: bold;
+            color: #28a745;
+            margin-bottom: 10px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .status-validé { background-color: #28a745; color: #fff; }
+        .status-en_cours { background-color: #ffc107; color: #000; }
+        .status-rejeté { background-color: #dc3545; color: #fff; }
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid #ecf0f1;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">SmartLeakPro</div>
+        <div class="title">Rapport de Validation</div>
+        <div class="subtitle">Validation des Interventions de Détection de Fuite</div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Informations de l'Intervention</div>
+        <table class="info-table">
+            <tr>
+                <th>Client</th>
+                <td>{{ data.intervention.client.nom }}</td>
+            </tr>
+            <tr>
+                <th>Type d'intervention</th>
+                <td>{{ data.intervention.type }}</td>
+            </tr>
+            <tr>
+                <th>Date d'intervention</th>
+                <td>{{ data.intervention.date_intervention.strftime('%d/%m/%Y à %H:%M') }}</td>
+            </tr>
+            <tr>
+                <th>Lieu</th>
+                <td>{{ data.intervention.lieu or 'Non spécifié' }}</td>
+            </tr>
+            <tr>
+                <th>Technicien</th>
+                <td>{{ data.intervention.technicien or 'Non assigné' }}</td>
+            </tr>
+            <tr>
+                <th>Priorité</th>
+                <td>{{ data.intervention.priorite }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Résumé de Validation</div>
+        <div class="validation-summary">
+            <h3>Intervention Validée</h3>
+            <p>Cette intervention a été validée et approuvée selon les critères de qualité SmartLeakPro.</p>
+            <p><strong>Date de validation:</strong> {{ data.metadata.date_generation.strftime('%d/%m/%Y à %H:%M') }}</p>
+        </div>
+    </div>
+
+    {% if data.intervention.description %}
+    <div class="section">
+        <div class="section-title">Description de l'Intervention</div>
+        <p>{{ data.intervention.description }}</p>
+    </div>
+    {% endif %}
+
+    {% if data.inspections %}
+    <div class="section">
+        <div class="section-title">Détail des Inspections</div>
+        {% for inspection in data.inspections %}
+        <div class="validation-item">
+            <div class="validation-header">
+                {{ inspection.type }}
+                <span class="status-badge status-{{ inspection.statut }}">{{ inspection.statut }}</span>
+            </div>
+            {% if inspection.resultat %}
+            <p><strong>Résultat:</strong> {{ inspection.resultat }}</p>
+            {% endif %}
+            {% if inspection.observations %}
+            <p><strong>Observations:</strong> {{ inspection.observations }}</p>
+            {% endif %}
+            {% if inspection.date %}
+            <p><strong>Date:</strong> {{ inspection.date.strftime('%d/%m/%Y à %H:%M') }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="section">
+        <div class="section-title">Conclusion</div>
+        <p>L'intervention a été menée à bien selon les standards de qualité SmartLeakPro. 
+        Tous les éléments ont été vérifiés et validés.</p>
+        
+        <h4>Recommandations:</h4>
+        <ul>
+            <li>Surveillance continue recommandée</li>
+            <li>Prochaine inspection programmée selon le planning de maintenance</li>
+            <li>Suivi des indicateurs de performance</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        <p>Rapport de validation généré le {{ data.metadata.date_generation.strftime('%d/%m/%Y à %H:%M') }}</p>
+        <p>SmartLeakPro - Système de Gestion des Détections de Fuite d'Eau</p>
+    </div>
+</body>
+</html>

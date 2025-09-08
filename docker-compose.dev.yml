@@ -1,0 +1,83 @@
+# Docker Compose pour le développement - Phase 8
+version: '3.8'
+
+services:
+  # Base de données PostgreSQL pour le développement
+  db:
+    image: postgres:15-alpine
+    container_name: smartleakpro_db_dev
+    environment:
+      POSTGRES_DB: smartleakpro_dev
+      POSTGRES_USER: smartleakpro
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - smartleakpro_dev_network
+    restart: unless-stopped
+
+  # Redis pour le développement
+  redis:
+    image: redis:7-alpine
+    container_name: smartleakpro_redis_dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev_data:/data
+    networks:
+      - smartleakpro_dev_network
+    restart: unless-stopped
+
+  # Backend en mode développement avec hot reload
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: smartleakpro_backend_dev
+    environment:
+      DATABASE_URL: postgresql://smartleakpro:password@db:5432/smartleakpro_dev
+      SECRET_KEY: dev-secret-key
+      ENVIRONMENT: development
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - /app/__pycache__
+    depends_on:
+      - db
+      - redis
+    networks:
+      - smartleakpro_dev_network
+    restart: unless-stopped
+    command: ["python", "-m", "uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+  # Frontend en mode développement
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: smartleakpro_frontend_dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    networks:
+      - smartleakpro_dev_network
+    restart: unless-stopped
+    command: ["npm", "start"]
+
+volumes:
+  postgres_dev_data:
+  redis_dev_data:
+
+networks:
+  smartleakpro_dev_network:
+    driver: bridge
